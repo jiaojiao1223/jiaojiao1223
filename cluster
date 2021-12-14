@@ -1,0 +1,192 @@
+library(Seurat)
+library(patchwork)
+library(dplyr)
+library(tidyverse)
+data <- read.table("/home/majiao/GSE116222_Expression_matrix.txt",header = TRUE,sep = "")
+
+if (FALSE) {
+  data_dir <- 'path/to/data/directory'
+  list.files(data_dir) 
+  expression_matrix <- Read10X(data.dir = data_dir)
+  seurat_object = CreateSeuratObject(counts = expression_matrix)
+  data_dir <- 'path/to/data/directory'
+  list.files(data_dir)
+  data <- Read10X(data.dir = data_dir)
+  seurat_object = CreateSeuratObject(counts = data$`Gene Expression`)
+  seurat_object[['Protein']] = CreateAssayObject(counts = data$`Antibody Capture`)
+}
+data5 <- Read10X(data.dir = "/home/majiao/cell5")
+
+
+UN.A <- data[,grep(".A2",colnames(data))]
+UN.B <- data[,grep(".B2",colnames(data))]
+UN.C <- data[,grep(".C2",colnames(data))]
+
+count <- Matrix::readMM(file = "/home/majiao/cell/matrix.mtx")
+summary(count)
+genenames <- read.delim("/home/majiao/cell/genes.tsv", header = F)
+barcodes <- read.delim("/home/majiao/cell/barcodes.tsv", header = F)
+colnames(count) <- barcodes[ ,1]
+rownames(count) <- genenames[ ,1]
+
+HEA.N10 <- CreateSeuratObject(counts = data2,
+                             min.cells = 10,
+                             min.features = 200,
+                             project = "N10")
+
+test <- CreateSeuratObject(counts = count,
+                           min.cells = 10,
+                           min.features = 200,
+                           project = "UN.N7")
+test$id <- rownames(test@meta.data)
+test$id_num <- apply(test@meta.data,1,function(x){unlist(strsplit(x[4],split = '[.]'))[1]})
+test <- subset(test, subset= id_num=='N7')
+
+test$Epi_Status<-
+  ifelse(grepl("N7.EpiA",rownames(test@meta.data)),
+         "Yes","No")
+test_Epi <- subset(test, subset= Epi_Status=='Yes')
+
+
+
+UC.A3 <- CreateSeuratObject(counts = UC.A,project = "UC.A",min.cells = 10,min.features = 200)
+UC.B3 <- CreateSeuratObject(counts = UC.B,project = "UC.B",min.cells = 10,min.features = 200)
+UC.C3 <- CreateSeuratObject(counts = UC.C,project = "UC.C",min.cells = 10,min.features = 200)
+
+UC.A3[["percent.mt"]] <- PercentageFeatureSet(UC.A3,pattern = "^MT-")
+UC.B3[["percent.mt"]] <- PercentageFeatureSet(UC.B3,pattern = "^MT-")
+UC.C3[["percent.mt"]] <- PercentageFeatureSet(UC.C3,pattern = "^MT-")
+UC.ING[["percent.mt"]] <- PercentageFeatureSet(UC.ING,pattern = "^MT-")
+UC.N12[["percent.mt"]] <- PercentageFeatureSet(UC.N12,pattern = "^MT-")
+UC.N14[["percent.mt"]] <- PercentageFeatureSet(UC.N14,pattern = "^MT-")
+UC.N19[["percent.mt"]] <- PercentageFeatureSet(UC.N19,pattern = "^MT-")
+UC.N23[["percent.mt"]] <- PercentageFeatureSet(UC.N23,pattern = "^MT-")
+UC.N26[["percent.mt"]] <- PercentageFeatureSet(UC.N26,pattern = "^MT-")
+UC.N44[["percent.mt"]] <- PercentageFeatureSet(UC.N44,pattern = "^MT-")
+UC.N50[["percent.mt"]] <- PercentageFeatureSet(UC.N50,pattern = "^MT-")
+UC.N539[["percent.mt"]] <- PercentageFeatureSet(UC.N539,pattern = "^MT-")
+UC.N7[["percent.mt"]] <- PercentageFeatureSet(UC.N7,pattern = "^MT-")
+UC.N9[["percent.mt"]] <- PercentageFeatureSet(UC.N9,pattern = "^MT-")
+
+
+UC.A3 <- subset(UC.A3,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.B3 <- subset(UC.B3,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.C3 <- subset(UC.C3,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.ING <- subset(UC.ING,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.N12 <- subset(UC.N12,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.N14 <- subset(UC.N14,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.N19 <- subset(UC.N19,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.N23 <- subset(UC.N23,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.N26 <- subset(UC.N26,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.N44 <- subset(UC.N44,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.N50 <- subset(UC.N50,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.N539 <- subset(UC.N539,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.N7 <- subset(UC.N7,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC.N9 <- subset(UC.N9,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+
+UC.A3 <- NormalizeData(UC.A3)
+UC.B3 <- NormalizeData(UC.B3)
+UC.C3 <- NormalizeData(UC.C3)
+UC.ING <- NormalizeData(UC.ING)
+UC.N12 <- NormalizeData(UC.N12)
+UC.N14 <- NormalizeData(UC.N14)
+UC.N19 <- NormalizeData(UC.N19)
+UC.N23 <- NormalizeData(UC.N23)
+UC.N26 <- NormalizeData(UC.N26)
+UC.N44 <- NormalizeData(UC.N44)
+UC.N50 <- NormalizeData(UC.N50)
+UC.N539 <- NormalizeData(UC.N539)
+UC.N7 <- NormalizeData(UC.N7)
+UC.N9 <- NormalizeData(UC.N9)
+
+UC.A3<- FindVariableFeatures(UC.A3,selection.method = "vst",nfeatures = 2000)
+UC.B3 <- FindVariableFeatures(UC.B3,selection.method = "vst",nfeatures = 2000)
+UC.C3 <- FindVariableFeatures(UC.C3,selection.method = "vst",nfeatures = 2000)
+UC.ING <- FindVariableFeatures(UC.ING,selection.method = "vst",nfeatures = 2000)
+UC.N12 <- FindVariableFeatures(UC.N12,selection.method = "vst",nfeatures = 2000)
+UC.N14 <- FindVariableFeatures(UC.N14,selection.method = "vst",nfeatures = 2000)
+UC.N19 <- FindVariableFeatures(UC.N19,selection.method = "vst",nfeatures = 2000)
+UC.N23 <- FindVariableFeatures(UC.N23,selection.method = "vst",nfeatures = 2000)
+UC.N26 <- FindVariableFeatures(UC.N26,selection.method = "vst",nfeatures = 2000)
+UC.N44 <- FindVariableFeatures(UC.N44,selection.method = "vst",nfeatures = 2000)
+UC.N50 <- FindVariableFeatures(UC.N50,selection.method = "vst",nfeatures = 2000)
+UC.N539 <- FindVariableFeatures(UC.N539,selection.method = "vst",nfeatures = 2000)
+UC.N7 <- FindVariableFeatures(UC.N7,selection.method = "vst",nfeatures = 2000)
+UC.N9 <- FindVariableFeatures(UC.N9,selection.method = "vst",nfeatures = 2000)
+
+health.anchors <- FindIntegrationAnchors(object.list = list(UC.A3,UC.B3,UC.C3,UC.ING,
+                                                            UC.N12,UC.N14,UC.N19,UC.N23,
+                                                            UC.N26,UC.N44,UC.N50,
+                                                            UC.N539,UC.N7,UC.N9),dims = 1:20)
+
+UC.integrated <- IntegrateData(anchorset = health.anchors,dims = 1:20)
+
+DefaultAssay(UC.integrated) <- "integrated"
+UC.integrated <- ScaleData(UC.integrated,features = rownames(UC.integrated))
+UC.integrated <- RunPCA(UC.integrated,features = VariableFeatures(object = UC.integrated))
+
+VizDimLoadings(UC.integrated,dims = 1:2,reduction = "pca")
+DimPlot(health.integrated,reduction = "pca")
+DimHeatmap(health.integrated,dims = 1,cells = 500,balanced = TRUE)
+DimHeatmap(health.integrated,dims = 1:15,cells = 500,balanced = TRUE)
+
+UC.integrated <- JackStraw(UC.integrated,num.replicate = 100)
+UC.integrated <- ScoreJackStraw(UC.integrated,dims = 1:20)
+JackStrawPlot(UC.integrated,dims = 1:15)
+ElbowPlot(UC.integrated)
+
+
+
+
+UC.integrated <- FindNeighbors(UC.integrated,dims = 1:13)
+UC.integrated <- FindClusters(UC.integrated,resolution = 1)
+UC.integrated <- RunUMAP(UC.integrated,dims = 1:13)
+UC.integrated <- RunTSNE(UC.integrated,dims = 1:13)
+
+library(cowplot)
+p1 <- DimPlot(UC.integrated,reduction = "umap",group.by = "orig.ident")
+p2 <- DimPlot(UC.integrated,reduction = "umap",label = TRUE,repel = TRUE)
+p1+p2
+
+p3 <- DimPlot(UC.integrated,reduction = "tsne",group.by = "orig.ident")
+p4 <- DimPlot(UC.integrated,reduction = "tsne",label = TRUE,repel = TRUE)
+p3+p4
+
+
+
+DefaultAssay(UC.integrated) <- "RNA"
+
+cluster10.makers <- FindMarkers(UC.integrated,ident.1 = 10,min.pct = 0.25)
+head(cluster14.makers,n=5)
+
+UC.makers <- FindAllMarkers(UC.integrated,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+
+
+
+VlnPlot(UC.integrated,features = c("MT2A","MT1G","KRT19","PHGR1","S100A6","SELENBP1","CA1","CEACAM1","CEACAM7"))
+FeaturePlot(health.integrated,features = c("TPSB2","TPSAB1"))
+
+health.makers %>%group_by(cluster)%>%top_n(n=2,wt = avg_log2FC)
+top20 <- health.makers %>% group_by(cluster) %>% top_n(n=20,wt = avg_log2FC)
+DoHeatmap(health.integrated,features = top20$gene) + NoLegend()
+
+health.integrated <- RenameIdents(health.integrated, `0` = "Transit Amplifyling Cell", `1` = "CT Colonocytes", `2` = "Absorptive Progenitors", 
+                                  `3` = "Colonocytes", `4` = "Transit Amplifyling Cell", `5` = "Goblet Cells", `6` = "Cycling TA", `7` = "Transit Amplifyling Cell", `8` = "CT Colonocytes", `9` = "Immature enterocytes", 
+                                  `10` = "Cycling TA", `11` = "CT Colonocytes", `12` = "T Cells", `13` = "Secretory Progenitors", `14` = "BEST4/OTOP2")
+DimPlot(health.integrated, label = TRUE)
+
+Idents(health.integrated) <- factor(Idents(health.integrated),
+                                    levels = c("Transit Amplifyling Cell","CT Colonocytes","Absorptive Progenitors",
+                                               "Colonocytes","Goblet Cells","Cycling TA","Immature enterocytes",
+                                               "T Cells","Secretory Progenitors","BEST4/OTOP2"))
+
+markers.to.plot <- c("CA7","BEST4","OTOP2","MT2A","MT1G",
+                     "AQP8","SLC26A3","GUCA2A","CEACAM7","CEACAM1","CA1","SELENBP1",
+                     "S100A6","PHGR1","KRT19",
+                     "EEF1A1","CREM","CCL5","TMSB4X","B2M","SRGN",
+                     "TFF3","WFDC2","MUC2","ITLN1","SPINK4",
+                     "NUPR1","RARRES2","MLEC","TMSB10","HES1","SNHG5","MGST1","ADH1C",
+                     "UGT2B17","CA2","FABP1","FXYD3","LGALS4","SLC26A2",
+                     "ELF3","HEXIM1","METTL12","RN7SK",
+                     "UBE2C","CENPW","CENPM","TK1","STMN1","PTTG1")
+DotPlot(health.integrated,features = markers.to.plot,cols = c("green","yellow"),dot.scale = 8)+RotatedAxis()
