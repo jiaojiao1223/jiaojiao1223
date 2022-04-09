@@ -1,0 +1,71 @@
+library(monocle3, lib.loc = "/home/majiao/miniconda3/envs/monocle3/lib/R/library")
+library(Seurat)
+library(leidenbase)
+library(ggplot2)
+Tcell <- readRDS("~/Program/Singlecell_Gastric/Tcell.rds")
+data <- GetAssayData(onlyepi, assay = 'RNA', slot = 'counts')
+cell_metadata <- onlyepi@meta.data
+gene_annotation <- data.frame(gene_short_name = rownames(data))
+rownames(gene_annotation) <- rownames(data)
+cds <- new_cell_data_set(data,
+                         cell_metadata = cell_metadata,
+                         gene_metadata = gene_annotation)
+
+cds <- preprocess_cds(cds, num_dim = 50)
+
+cds <- reduce_dimension(cds,preprocess_method = "PCA", reduction_method = "UMAP") #preprocess_method默认是PCA
+cds <- cluster_cells(cds, reduction_method = "UMAP")
+
+cds.embed <- cds@int_colData$reducedDims$UMAP
+int.embed <- Embeddings(onlyepi, reduction = "umap")
+int.embed <- int.embed[rownames(cds.embed),]
+cds@int_colData$reducedDims$UMAP <- int.embed
+
+cds <- learn_graph(cds)
+saveRDS(cds, "onlyepi.rds")
+
+Clustercolor <- c("#334f65" ,"#b3974e",
+                  "#38cb7d" ,"#ddae33" ,"#844bb3" ,"#93c555" ,"#5f6694" ,"#df3881",
+                  "#0780cf" ,"#765005" ,"#fa6d1d" ,"#0e2c82" ,"#b6b51f" ,"#da1f18",
+                  "#701866" ,"#f47a75" ,"#009db2" ,"#024b51" ,"#63b2ee" ,"#76da91",
+                  "#f8cb7f" ,"#f89588" ,"#7cd6cf" ,"#9192ab" ,"#79CDCD" ,"#45a776" ,"#f05326" ,"#eed777"
+)
+
+
+library(magrittr)
+pData(cds) %>% View()
+
+p = plot_cells(cds, color_cells_by = "cell_type", label_cell_groups = F, label_groups_by_cluster=FALSE,
+               label_leaves=FALSE, label_branch_points=FALSE)+
+  scale_colour_manual(values = Clustercolor)+
+  theme_bw()+
+  labs(title = "", fill = "Celltype")+
+  xlab("UMAP_1")+
+  ylab("UAMP_2")+
+  theme(legend.title=element_blank())+
+  theme(axis.text=element_text(family = "Arial", size=13, face = "bold"), # 坐标轴刻度
+        axis.title=element_text(family = "Arial", size=13, face="bold"), # 坐标轴标题
+        panel.border = element_rect(fill=NA,color="black", size=1, linetype="solid"), # 调整坐标轴边框的粗细
+        panel.background = element_blank(), #去除背景
+        panel.grid=element_blank(), #去除网格线
+        axis.title.x = element_text(margin = margin(t = 0.4, unit = "cm")),
+        axis.title.y = element_text(margin = margin(t = 0, r = 0.4, b = 0, l = 0, unit = "cm")))
+        
+cds <- order_cells(cds)
+        
+p = plot_cells(cds, color_cells_by = "pseudotime", label_cell_groups = FALSE, 
+               label_leaves = FALSE,  label_branch_points = FALSE)+
+  xlab("UMAP_1")+
+  ylab("UAMP_2")+
+  theme(legend.title=element_blank())+
+  theme(axis.text=element_text(family = "Arial", size=13, face = "bold"), # 坐标轴刻度
+        axis.title=element_text(family = "Arial", size=13, face="bold"), # 坐标轴标题
+        panel.border = element_rect(fill=NA,color="black", size=1, linetype="solid"), # 调整坐标轴边框的粗细
+        panel.background = element_blank(), #去除背景
+        panel.grid=element_blank(), #去除网格线
+        axis.title.x = element_text(margin = margin(t = 0.4, unit = "cm")),
+        axis.title.y = element_text(margin = margin(t = 0, r = 0.4, b = 0, l = 0, unit = "cm")))        
+        
+        
+        
+        
