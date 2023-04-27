@@ -1,0 +1,134 @@
+library(GSVA)
+library(GSVAdata)
+library(GSEABase)
+library(limma)
+library(tidyverse)
+
+###########GSVA
+GSE17538_matrix <- read.csv("/home/majiao/validation/GSE17538_matrix.txt",sep = "\t",header = TRUE,
+                   check.names = FALSE)
+TCGA_CMS <- read.delim("/home/majiao/validation/TCGA_CMS.txt",sep = "\t",header = TRUE,
+                  check.names = FALSE)
+GSE33113_metadata <- read.delim("/home/majiao/validation/GSE33113_metadata.txt",sep = "\t",header = TRUE,
+                       check.names = FALSE)
+CAC <- read.table("/home/majiao/validation/mmc7.txt",sep = "\t",header = TRUE,
+                   check.names = FALSE)
+
+CAC <- arrange(CAC,-`Fold-Change`)
+pathway <-CAC$Gene_symbol
+
+
+geneSets <- list(pathway)
+names(geneSets) <- c("CAC gene list")
+
+CAC <- gsva(as.matrix(TCGA),geneSets,method='gsva',
+             kcdf='Gaussian',abs.ranking=TRUE)
+CAC <- t(CAC)
+CAC <- data.frame(CAC)
+
+###########比较
+
+CAC$submitter_id <- rownames(CAC)
+meta <- merge(CAC,TCGA_CMS,by="submitter_id")
+
+meta <- merge(GSE2109_CMS,meta,by="ID_REF")
+
+
+meta <- arrange(meta,-UC.CRC.gene.list)
+
+
+#########TCGA_5%
+meta[which(meta$CAC.gene.list <= '0.5415797'),'status']<-'sCRC'
+meta[which(meta$CAC.gene.list > "0.5415797"),'status']<-'CAC'
+#########8% 
+meta[which(meta$CAC.gene.list <= '0.5239958'),'status']<-'sCRC'
+meta[which(meta$CAC.gene.list > '0.5239958'),'status']<-'CAC'
+#########10%  
+meta[which(meta$CAC.gene.list <= '0.5054054'),'status']<-'sCRC'
+meta[which(meta$CAC.gene.list > "0.5054054"),'status']<-'CAC'
+
+
+CAC <- subset(meta,subset=status=="CAC")
+
+sCRC <- subset(meta,subset=status=="sCRC")
+
+
+color <- c("#1E94A0","#004E6D","#FEC0C1","#DC2543","#030305")
+
+########堆叠条形图
+p1 <- ggplot(data=metadata, mapping=aes(x=status,fill=CMS,))+
+  geom_bar(stat="count",width=0.5,position='fill')+
+  scale_fill_manual(values=c("#1E94A0","#004E6D","#FEC0C1","#DC2543","#030305"))+
+  geom_text(stat='count',aes(label=scales::percent(..count../sum(..count..)))
+            , color="white", size=3.5,position=position_fill(0.5))+
+  theme_minimal()+
+  theme(axis.text=element_text(family = "Arial", size=13, face = "bold"), # 坐标轴刻度
+        axis.title=element_text(family = "Arial", size=13, face="bold"), # 坐标轴标题
+        panel.border = element_rect(fill=NA,color="black", size=1, linetype="solid"), # 调整坐标轴边框的粗细
+        panel.background = element_blank(), #去除背景
+        panel.grid=element_blank(), #去除网格线
+        legend.title = element_blank(),
+        legend.text = element_text(size = 13),
+        legend.key.size=unit(1,'cm'))+
+  guides(color = guide_legend(override.aes = list(size = 5)))+
+  ggtitle("TCGA(n=493)")+
+  theme(text = element_text(size = 13), 
+        axis.text.x = element_text(size = 13), 
+        plot.title = element_text(hjust = 0.5))
+
+
+ggsave(p1,filename = "plot.pdf",width = 6,height = 6)
+
+
+
+
+
+
+
+my_compare <- list(c('CAC','sCRC'))
+
+library(ggplot2)
+library(ggpubr,lib.loc = "/home/majiao/ENTER/envs/ggpubr2/lib/R/library")
+
+color <-c("#DC2543","#1E94A0","#FEC0C1")
+
+p1 <- ggplot(meta,aes(x = reorder(status,meta$age_at_initial_pathologic_diagnosis), y = age_at_initial_pathologic_diagnosis, fill = status, group = status))+
+  geom_boxplot(width=0.2,position=position_dodge(0.9),outlier.colour = NA,fill="white")+
+  theme_bw()+
+  theme(legend.position="none",
+        axis.text.x = element_text(hjust = 0.5, vjust = 0.5),
+        axis.text.y = element_text(hjust = 0.5, vjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text( size=rel(1)),
+        panel.border = element_blank(),
+        axis.line = element_line(colour = "black",size=1)
+  )+scale_fill_manual(values = color)+
+  theme(text = element_text(size = 18),
+        axis.text.x = element_text(size = 18),
+        plot.title = element_text(hjust = 0.5),
+        legend.position = c(0.15,0.9))+
+  ggtitle("TCGA(5%)") +
+  xlab("subset") +  ylab("Age at diagnosis")+
+  stat_compare_means(comparisons = my_compare)
+
+
+ggsave(p1,filename = "plot.png",width = 6,height = 6)
+
+write.table(metadata,file = "metadata.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+
+
+
+
+GSE17538_metadata <- read.csv("/home/majiao/validation/GSE17538_metadata.txt",sep = "\t",header = TRUE,
+                  check.names = FALSE)
+write.table(GSE17538_metadata,file = "GSE17538_metadata.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+
+
+
+
