@@ -1,0 +1,122 @@
+data <- read.table("/home/majiao/model/IBD_CRC_GSVA.txt",sep = "\t",header = TRUE,
+                   check.names = FALSE)
+x <- CAC$CAC.gene.list
+library(flexmix)
+
+min_prior = 0.001
+niter = 1000
+nrep = 5
+
+control <- new("FLXcontrol")
+control@minprior <- min_prior
+control@iter.max <- niter
+
+set.seed(2021)
+rv = stepFlexmix(
+  x ~ 1,
+  model = flexmix::FLXMCnorm1(),
+  k = seq(2, 10),
+  nrep = nrep,
+  control = control
+)
+
+#  log-likelihood
+BIC(rv)
+get_component_parameter(rv@models$`2`)
+getModel(rv, "BIC")
+
+get_component_parameter <- function(x) {
+  paras <- flexmix::parameters(x)
+  # weight is how many events assigned
+  # to a cluster (component)
+  # i.e. number of observations
+  #
+  # Info from package author:
+  # the cluster sizes indicate the number
+  # of observations assigned to each of the
+  # clusters according to the a-posteriori probabilities.
+  .get_weight <- function(mean, x) {
+    wt_tb <- table(flexmix::clusters(x))
+    wt <- as.numeric(wt_tb)
+    if (length(wt) == length(mean)) {
+      return(wt)
+    } else {
+      names(wt) <- names(wt_tb)
+      all_names <- as.character(seq_along(mean))
+      wt[setdiff(all_names, names(wt))] <- 0
+      as.numeric(wt[sort(names(wt))])
+    }
+  }
+  
+  if (is.null(dim(paras))) {
+    # Assume it is pois distribution
+    z <- data.table::data.table(
+      mean = as.numeric(paras)
+    )
+    z$sd <- sqrt(z$mean)
+    z$n <- .get_weight(z$mean, x)
+  } else {
+    # Assume it is normal distribution
+    z <- data.table::data.table(
+      mean = as.numeric(paras[1, ]),
+      sd = as.numeric(paras[2, ])
+    )
+    z$n <- .get_weight(z$mean, x)
+  }
+  z
+}
+
+
+
+
+test1 <- BIC(rv)
+test1 <- data.frame(test1)
+test1$k <- rownames(test1)
+test1 <- test1[,c(2,1)]
+
+
+k <- test1$k
+test2 <- test1$test1
+
+plot(k,test2,type="b",
+     col="red",lty=2,pch=2,lwd=2,
+     main="BIC values corresponding to different k values",
+     xlab="k",
+     ylab="BIC",
+     xlam=c(2,10),
+     ylim=c(-400,-300))
+
+
+
+
+fit <- survfit(Surv(OS.time,OS) ~ status,data = meta)
+ggsurvplot(fit, data = meta, pval = TRUE)
+
+########
+
+
+
+
+#要是没有这个包的话，首先需要安装一下
+#install.packages("factoextra")
+#载入包
+library(factoextra)
+# 载入数据
+data("USArrests") 
+# 数据进行标准化
+df <- scale(USArrests) 
+# 查看数据的前五行
+
+#确定最佳聚类数目
+fviz_nbclust(df, kmeans, method = "wss") + geom_vline(xintercept = 5, linetype = 2)
+
+
+
+
+
+
+
+
+
+
+
