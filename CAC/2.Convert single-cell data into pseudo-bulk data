@@ -1,0 +1,29 @@
+counts <- AllCancer@assays$RNA@counts
+metadata <- AllCancer@meta.data
+sce <-SingleCellExperiment(assays = list(counts = counts),colData = metadata)
+groups <- colData(sce)[,c("samples")]
+
+
+colData(sce) %>% 
+  as.data.frame %>% 
+  transmute(
+    samples_id = samples) %>%
+  mutate_all(as.factor) %>% 
+  set_rownames(colnames(sce)) %>% 
+  DataFrame -> colData(sce)
+
+head(colData(sce))
+
+
+groups <- colData(sce)[,c("samples_id")]
+
+pb <- aggregate.Matrix(t(counts(sce)),groupings = groups,fun = "sum")
+pb <- data.frame(pb)
+pb <- t(pb)
+
+
+out <- data.frame(out)
+dygg <- cbind(out,pb)
+dygg <- subset(dygg, subset= entrezID!='NA')
+rownames(dygg) <- dygg$entrezID
+dygg <- dygg[,-1]
