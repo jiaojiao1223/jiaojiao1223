@@ -1,0 +1,2002 @@
+library(tidyverse)
+library(Seurat)
+library(DoubletFinder)
+library(tidyverse)
+library(harmony)
+library(stringr)
+library(patchwork)
+library(SeuratDisk)
+library(ggrepel)
+library(monocle3, lib.loc = "/home/majiao/ENTER/envs/monocle3/lib/R/library")
+library(ggpubr, lib.loc = "/home/majiao/ENTER/envs/ggpubr2/lib/R/library")
+
+if (FALSE) {
+  data_dir <- 'path/to/data/directory'
+  list.files(data_dir) 
+  expression_matrix <- Read10X(data.dir = data_dir)
+  seurat_object = CreateSeuratObject(counts = expression_matrix)
+  data_dir <- 'path/to/data/directory'
+  list.files(data_dir)
+  data <- Read10X(data.dir = data_dir)
+  seurat_object = CreateSeuratObject(counts = data$`Gene Expression`)
+  seurat_object[['Protein']] = CreateAssayObject(counts = data$`Antibody Capture`)
+}
+
+data1 <- Read10X_h5("/home/majiao/IBD-CRC/Full_obj_raw_counts_nosoupx.h5ad")
+
+Cancer <- CreateSeuratObject(counts = data1,
+                             min.cells = 10,
+                             min.features = 200)
+Cancer$samples<-
+  ifelse(grepl("C173_T",rownames(Cancer@meta.data)),
+         "Yes","No")
+dygg <- subset(Cancer, subset= samples=='Yes')
+data1 <- dygg@assays$RNA@counts
+data1 <- data.frame(data1)
+rownames <- str_replace(rownames(data1),"-",".")
+rownames(data1) <- rownames
+
+Cancer132 <- CreateSeuratObject(counts = data1,
+                               min.cells = 10,
+                               min.features = 200)
+
+Cancer132@meta.data$samples='GSM5388148'
+Cancer132@meta.data$GEO ='GSE178341'
+Cancer132@meta.data$status='Colorectal Cancer'
+
+###h5ad文件
+library(SeuratDisk)
+library(patchwork)
+library(Seurat)
+library(dplyr)
+library(ggplot2)
+Convert('/home/majiao/IBD-CRC/Full_obj_raw_counts_nosoupx.h5ad', "h5seurat",
+                overwrite = TRUE,assay = "RNA")
+Healthy <- LoadH5Seurat("/home/majiao/IBD-CRC/Full_obj_raw_counts_nosoupx.h5seurat")
+
+
+
+
+
+HEA19 <- data1[,grep(".A1",colnames(data1))]
+HEA20 <- data1[,grep(".B1",colnames(data1))]
+HEA21 <- data1[,grep(".C1",colnames(data1))]
+
+UC.A <- data1[,grep(".A3",colnames(data1))]
+UC.B <- data1[,grep(".B3",colnames(data1))]
+UC.C <- data1[,grep(".C3",colnames(data1))]
+#######################################
+Immune <- CreateSeuratObject(counts = Immune,
+                                min.cells = 10,
+                                min.features = 200)
+Immune$samples<-
+  ifelse(grepl("N46",rownames(Immune@meta.data)),
+         "Yes","No")
+dygg <- subset(Immune, subset= samples=='Yes')
+
+
+data1 <- dygg@assays$RNA@counts
+data1 <- data.frame(data1)
+rownames <- str_replace(rownames(data1),"-",".")
+rownames(data1) <- rownames
+
+
+Healthy41 <- CreateSeuratObject(counts = data1,
+                         min.cells = 10,
+                         min.features = 200)
+
+Healthy41@meta.data$samples='N46'
+Healthy41@meta.data$GEO ='SCP259'
+Healthy41@meta.data$status='Healthy'
+
+
+
+
+
+
+
+
+data1 <- data.frame(data1)
+rownames <- str_replace(rownames(data1),"-",".")
+rownames(data1) <- rownames
+
+Cancer <- CreateSeuratObject(counts = data1,
+                             min.cells = 10,
+                             min.features = 200)
+
+Cancer$samples<-
+  ifelse(grepl(".19",rownames(Cancer@meta.data)),
+         "Yes","No")
+dygg <- subset(Cancer, subset= samples=='Yes')
+
+data1 <- dygg@assays$RNA@counts
+data1 <- data.frame(data1)
+rownames <- str_replace(rownames(data1),"-",".")
+rownames(data1) <- rownames
+
+
+
+
+
+
+
+
+
+
+
+
+
+##行列互换：
+rownames(data1) <- data1[,1]
+data1 <- data1[ ,-1]
+
+data2 <- t(data1)
+
+
+
+
+
+
+
+
+count <- Matrix::readMM(file = "/home/majiao/cell/matrix.mtx")
+summary(count)
+genenames <- read.delim("/home/majiao/cell/genes.tsv", header = F)
+barcodes <- read.delim("/home/majiao/cell/barcodes.tsv", header = F)
+colnames(count) <- barcodes[ ,1]
+rownames(count) <- genenames[ ,1]
+
+
+data1$samples<-
+  ifelse(grepl("COL07",rownames(data1@meta.data)),
+         "Yes","No")
+xx <- subset(data1, subset= Epi_Status=='Yes')
+
+
+
+
+
+Healthy1[["percent.mt"]] <- PercentageFeatureSet(Healthy1,pattern = "^MT-")
+Healthy2[["percent.mt"]] <- PercentageFeatureSet(Healthy2,pattern = "^MT-")
+Healthy3[["percent.mt"]] <- PercentageFeatureSet(Healthy3,pattern = "^MT-")
+Healthy4[["percent.mt"]] <- PercentageFeatureSet(Healthy4,pattern = "^MT-")
+Healthy5[["percent.mt"]] <- PercentageFeatureSet(Healthy5,pattern = "^MT-")
+Healthy6[["percent.mt"]] <- PercentageFeatureSet(Healthy6,pattern = "^MT-")
+Healthy7[["percent.mt"]] <- PercentageFeatureSet(Healthy7,pattern = "^MT-")
+Healthy8[["percent.mt"]] <- PercentageFeatureSet(Healthy8,pattern = "^MT-")
+Healthy9[["percent.mt"]] <- PercentageFeatureSet(Healthy9,pattern = "^MT-")
+Healthy10[["percent.mt"]] <- PercentageFeatureSet(Healthy10,pattern = "^MT-")
+Healthy11[["percent.mt"]] <- PercentageFeatureSet(Healthy11,pattern = "^MT-")
+Healthy12[["percent.mt"]] <- PercentageFeatureSet(Healthy12,pattern = "^MT-")
+Healthy13[["percent.mt"]] <- PercentageFeatureSet(Healthy13,pattern = "^MT-")
+Healthy14[["percent.mt"]] <- PercentageFeatureSet(Healthy14,pattern = "^MT-")
+Healthy15[["percent.mt"]] <- PercentageFeatureSet(Healthy15,pattern = "^MT-")
+Healthy16[["percent.mt"]] <- PercentageFeatureSet(Healthy16,pattern = "^MT-")
+Healthy17[["percent.mt"]] <- PercentageFeatureSet(Healthy17,pattern = "^MT-")
+Healthy18[["percent.mt"]] <- PercentageFeatureSet(Healthy18,pattern = "^MT-")
+Healthy19[["percent.mt"]] <- PercentageFeatureSet(Healthy19,pattern = "^MT-")
+Healthy20[["percent.mt"]] <- PercentageFeatureSet(Healthy20,pattern = "^MT-")
+Healthy21[["percent.mt"]] <- PercentageFeatureSet(Healthy21,pattern = "^MT-")
+Healthy22[["percent.mt"]] <- PercentageFeatureSet(Healthy22,pattern = "^MT-")
+Healthy23[["percent.mt"]] <- PercentageFeatureSet(Healthy23,pattern = "^MT-")
+Healthy24[["percent.mt"]] <- PercentageFeatureSet(Healthy24,pattern = "^MT-")
+Healthy25[["percent.mt"]] <- PercentageFeatureSet(Healthy25,pattern = "^MT-")
+Healthy26[["percent.mt"]] <- PercentageFeatureSet(Healthy26,pattern = "^MT-")
+Healthy27[["percent.mt"]] <- PercentageFeatureSet(Healthy27,pattern = "^MT-")
+Healthy28[["percent.mt"]] <- PercentageFeatureSet(Healthy28,pattern = "^MT-")
+Healthy29[["percent.mt"]] <- PercentageFeatureSet(Healthy29,pattern = "^MT-")
+Healthy30[["percent.mt"]] <- PercentageFeatureSet(Healthy30,pattern = "^MT-")
+Healthy31[["percent.mt"]] <- PercentageFeatureSet(Healthy31,pattern = "^MT-")
+Healthy32[["percent.mt"]] <- PercentageFeatureSet(Healthy32,pattern = "^MT-")
+Healthy33[["percent.mt"]] <- PercentageFeatureSet(Healthy33,pattern = "^MT-")
+Healthy34[["percent.mt"]] <- PercentageFeatureSet(Healthy34,pattern = "^MT-")
+Healthy35[["percent.mt"]] <- PercentageFeatureSet(Healthy35,pattern = "^MT-")
+Healthy36[["percent.mt"]] <- PercentageFeatureSet(Healthy36,pattern = "^MT-")
+Healthy37[["percent.mt"]] <- PercentageFeatureSet(Healthy37,pattern = "^MT-")
+Healthy38[["percent.mt"]] <- PercentageFeatureSet(Healthy38,pattern = "^MT-")
+Healthy39[["percent.mt"]] <- PercentageFeatureSet(Healthy39,pattern = "^MT-")
+Healthy40[["percent.mt"]] <- PercentageFeatureSet(Healthy40,pattern = "^MT-")
+Healthy41[["percent.mt"]] <- PercentageFeatureSet(Healthy41,pattern = "^MT-")
+
+
+
+
+UC1[["percent.mt"]] <- PercentageFeatureSet(UC1,pattern = "^MT-")
+UC2[["percent.mt"]] <- PercentageFeatureSet(UC2,pattern = "^MT-")
+UC3[["percent.mt"]] <- PercentageFeatureSet(UC3,pattern = "^MT-")
+UC4[["percent.mt"]] <- PercentageFeatureSet(UC4,pattern = "^MT-")
+UC5[["percent.mt"]] <- PercentageFeatureSet(UC5,pattern = "^MT-")
+UC6[["percent.mt"]] <- PercentageFeatureSet(UC6,pattern = "^MT-")
+UC7[["percent.mt"]] <- PercentageFeatureSet(UC7,pattern = "^MT-")
+UC8[["percent.mt"]] <- PercentageFeatureSet(UC8,pattern = "^MT-")
+UC9[["percent.mt"]] <- PercentageFeatureSet(UC9,pattern = "^MT-")
+UC10[["percent.mt"]] <- PercentageFeatureSet(UC10,pattern = "^MT-")
+UC11[["percent.mt"]] <- PercentageFeatureSet(UC11,pattern = "^MT-")
+UC12[["percent.mt"]] <- PercentageFeatureSet(UC12,pattern = "^MT-")
+UC13[["percent.mt"]] <- PercentageFeatureSet(UC13,pattern = "^MT-")
+UC14[["percent.mt"]] <- PercentageFeatureSet(UC14,pattern = "^MT-")
+UC15[["percent.mt"]] <- PercentageFeatureSet(UC15,pattern = "^MT-")
+UC16[["percent.mt"]] <- PercentageFeatureSet(UC16,pattern = "^MT-")
+UC17[["percent.mt"]] <- PercentageFeatureSet(UC17,pattern = "^MT-")
+UC18[["percent.mt"]] <- PercentageFeatureSet(UC18,pattern = "^MT-")
+UC19[["percent.mt"]] <- PercentageFeatureSet(UC19,pattern = "^MT-")
+UC20[["percent.mt"]] <- PercentageFeatureSet(UC20,pattern = "^MT-")
+UC21[["percent.mt"]] <- PercentageFeatureSet(UC21,pattern = "^MT-")
+UC22[["percent.mt"]] <- PercentageFeatureSet(UC22,pattern = "^MT-")
+UC23[["percent.mt"]] <- PercentageFeatureSet(UC23,pattern = "^MT-")
+UC24[["percent.mt"]] <- PercentageFeatureSet(UC24,pattern = "^MT-")
+UC25[["percent.mt"]] <- PercentageFeatureSet(UC25,pattern = "^MT-")
+UC26[["percent.mt"]] <- PercentageFeatureSet(UC26,pattern = "^MT-")
+UC27[["percent.mt"]] <- PercentageFeatureSet(UC27,pattern = "^MT-")
+UC28[["percent.mt"]] <- PercentageFeatureSet(UC28,pattern = "^MT-")
+UC29[["percent.mt"]] <- PercentageFeatureSet(UC29,pattern = "^MT-")
+UC30[["percent.mt"]] <- PercentageFeatureSet(UC30,pattern = "^MT-")
+UC31[["percent.mt"]] <- PercentageFeatureSet(UC31,pattern = "^MT-")
+UC32[["percent.mt"]] <- PercentageFeatureSet(UC32,pattern = "^MT-")
+UC33[["percent.mt"]] <- PercentageFeatureSet(UC33,pattern = "^MT-")
+UC34[["percent.mt"]] <- PercentageFeatureSet(UC34,pattern = "^MT-")
+UC35[["percent.mt"]] <- PercentageFeatureSet(UC35,pattern = "^MT-")
+UC36[["percent.mt"]] <- PercentageFeatureSet(UC36,pattern = "^MT-")
+UC37[["percent.mt"]] <- PercentageFeatureSet(UC37,pattern = "^MT-")
+UC38[["percent.mt"]] <- PercentageFeatureSet(UC38,pattern = "^MT-")
+UC39[["percent.mt"]] <- PercentageFeatureSet(UC39,pattern = "^MT-")
+UC40[["percent.mt"]] <- PercentageFeatureSet(UC40,pattern = "^MT-")
+UC41[["percent.mt"]] <- PercentageFeatureSet(UC41,pattern = "^MT-")
+UC42[["percent.mt"]] <- PercentageFeatureSet(UC42,pattern = "^MT-")
+UC43[["percent.mt"]] <- PercentageFeatureSet(UC43,pattern = "^MT-")
+UC44[["percent.mt"]] <- PercentageFeatureSet(UC44,pattern = "^MT-")
+UC45[["percent.mt"]] <- PercentageFeatureSet(UC45,pattern = "^MT-")
+
+
+
+
+
+
+Cancer1[["percent.mt"]] <- PercentageFeatureSet(Cancer1,pattern = "^MT-")
+Cancer2[["percent.mt"]] <- PercentageFeatureSet(Cancer2,pattern = "^MT-")
+Cancer3[["percent.mt"]] <- PercentageFeatureSet(Cancer3,pattern = "^MT-")
+Cancer4[["percent.mt"]] <- PercentageFeatureSet(Cancer4,pattern = "^MT-")
+Cancer5[["percent.mt"]] <- PercentageFeatureSet(Cancer5,pattern = "^MT-")
+Cancer6[["percent.mt"]] <- PercentageFeatureSet(Cancer6,pattern = "^MT-")
+Cancer7[["percent.mt"]] <- PercentageFeatureSet(Cancer7,pattern = "^MT-")
+Cancer8[["percent.mt"]] <- PercentageFeatureSet(Cancer8,pattern = "^MT-")
+Cancer9[["percent.mt"]] <- PercentageFeatureSet(Cancer9,pattern = "^MT-")
+Cancer10[["percent.mt"]] <- PercentageFeatureSet(Cancer10,pattern = "^MT-")
+Cancer11[["percent.mt"]] <- PercentageFeatureSet(Cancer11,pattern = "^MT-")
+Cancer12[["percent.mt"]] <- PercentageFeatureSet(Cancer12,pattern = "^MT-")
+Cancer13[["percent.mt"]] <- PercentageFeatureSet(Cancer13,pattern = "^MT-")
+Cancer14[["percent.mt"]] <- PercentageFeatureSet(Cancer14,pattern = "^MT-")
+Cancer15[["percent.mt"]] <- PercentageFeatureSet(Cancer15,pattern = "^MT-")
+Cancer16[["percent.mt"]] <- PercentageFeatureSet(Cancer16,pattern = "^MT-")
+Cancer17[["percent.mt"]] <- PercentageFeatureSet(Cancer17,pattern = "^MT-")
+Cancer18[["percent.mt"]] <- PercentageFeatureSet(Cancer18,pattern = "^MT-")
+Cancer19[["percent.mt"]] <- PercentageFeatureSet(Cancer19,pattern = "^MT-")
+Cancer20[["percent.mt"]] <- PercentageFeatureSet(Cancer20,pattern = "^MT-")
+Cancer21[["percent.mt"]] <- PercentageFeatureSet(Cancer21,pattern = "^MT-")
+Cancer22[["percent.mt"]] <- PercentageFeatureSet(Cancer22,pattern = "^MT-")
+
+
+
+
+
+
+
+Healthy1 <- subset(Healthy1,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy2 <- subset(Healthy2,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy3 <- subset(Healthy3,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy4 <- subset(Healthy4,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy5 <- subset(Healthy5,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy6 <- subset(Healthy6,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy7 <- subset(Healthy7,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy8 <- subset(Healthy8,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy9 <- subset(Healthy9,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy10 <- subset(Healthy10,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy11 <- subset(Healthy11,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy12 <- subset(Healthy12,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy13 <- subset(Healthy13,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy14 <- subset(Healthy14,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy15 <- subset(Healthy15,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy16 <- subset(Healthy16,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy17 <- subset(Healthy17,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy18 <- subset(Healthy18,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy19 <- subset(Healthy19,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy20 <- subset(Healthy20,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy21 <- subset(Healthy21,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy22 <- subset(Healthy22,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy23 <- subset(Healthy23,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy24 <- subset(Healthy24,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy25 <- subset(Healthy25,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy26 <- subset(Healthy26,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy27 <- subset(Healthy27,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy28 <- subset(Healthy28,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy29 <- subset(Healthy29,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy30 <- subset(Healthy30,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy31 <- subset(Healthy31,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy32 <- subset(Healthy32,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy33 <- subset(Healthy33,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy34 <- subset(Healthy34,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy35 <- subset(Healthy35,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy36 <- subset(Healthy36,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy37 <- subset(Healthy37,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy38 <- subset(Healthy38,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy39 <- subset(Healthy39,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy40 <- subset(Healthy40,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Healthy41 <- subset(Healthy41,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+
+
+
+UC1 <- subset(UC1,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC2 <- subset(UC2,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC3 <- subset(UC3,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC4 <- subset(UC4,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC5 <- subset(UC5,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC6 <- subset(UC6,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC7 <- subset(UC7,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC8 <- subset(UC8,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC9 <- subset(UC9,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC10 <- subset(UC10,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC11 <- subset(UC11,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC12 <- subset(UC12,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC13 <- subset(UC13,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC14 <- subset(UC14,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC15 <- subset(UC15,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC16 <- subset(UC16,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC17 <- subset(UC17,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC18 <- subset(UC18,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC19 <- subset(UC19,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC20 <- subset(UC20,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC21 <- subset(UC21,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC22 <- subset(UC22,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC23 <- subset(UC23,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC24 <- subset(UC24,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC25 <- subset(UC25,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC26 <- subset(UC26,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC27 <- subset(UC27,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC28 <- subset(UC28,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC29 <- subset(UC29,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC30 <- subset(UC30,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC31 <- subset(UC31,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC32 <- subset(UC32,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC33 <- subset(UC33,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC34 <- subset(UC34,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC35 <- subset(UC35,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC36 <- subset(UC36,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC37 <- subset(UC37,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC38 <- subset(UC38,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC39 <- subset(UC39,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC40 <- subset(UC40,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC41 <- subset(UC41,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC42 <- subset(UC42,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC43 <- subset(UC43,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC44 <- subset(UC44,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+UC45 <- subset(UC45,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+
+
+
+
+Cancer1 <- subset(Cancer1,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer2 <- subset(Cancer2,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer3 <- subset(Cancer3,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer4 <- subset(Cancer4,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer5 <- subset(Cancer5,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer6 <- subset(Cancer6,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer7 <- subset(Cancer7,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer8 <- subset(Cancer8,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer9 <- subset(Cancer9,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer10 <- subset(Cancer10,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer11 <- subset(Cancer11,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer12 <- subset(Cancer12,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer13 <- subset(Cancer13,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer14 <- subset(Cancer14,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer15 <- subset(Cancer15,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer16 <- subset(Cancer16,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer17 <- subset(Cancer17,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer18 <- subset(Cancer18,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer19 <- subset(Cancer19,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer20 <- subset(Cancer20,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer21 <- subset(Cancer21,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+Cancer22 <- subset(Cancer22,subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt <5)
+
+
+Healthy1 <- NormalizeData(Healthy1)
+Healthy2 <- NormalizeData(Healthy2)
+Healthy3 <- NormalizeData(Healthy3)
+Healthy4 <- NormalizeData(Healthy4)
+Healthy5 <- NormalizeData(Healthy5)
+Healthy6 <- NormalizeData(Healthy6)
+Healthy7 <- NormalizeData(Healthy7)
+Healthy8 <- NormalizeData(Healthy8)
+Healthy9 <- NormalizeData(Healthy9)
+Healthy10 <- NormalizeData(Healthy10)
+Healthy11 <- NormalizeData(Healthy11)
+Healthy12 <- NormalizeData(Healthy12)
+Healthy13 <- NormalizeData(Healthy13)
+Healthy14 <- NormalizeData(Healthy14)
+Healthy15 <- NormalizeData(Healthy15)
+Healthy16 <- NormalizeData(Healthy16)
+Healthy17 <- NormalizeData(Healthy17)
+Healthy18 <- NormalizeData(Healthy18)
+Healthy19 <- NormalizeData(Healthy19)
+Healthy20 <- NormalizeData(Healthy20)
+Healthy21 <- NormalizeData(Healthy21)
+Healthy22 <- NormalizeData(Healthy22)
+Healthy23 <- NormalizeData(Healthy23)
+Healthy24 <- NormalizeData(Healthy24)
+Healthy25 <- NormalizeData(Healthy25)
+Healthy26 <- NormalizeData(Healthy26)
+Healthy27 <- NormalizeData(Healthy27)
+Healthy28 <- NormalizeData(Healthy28)
+Healthy29 <- NormalizeData(Healthy29)
+Healthy30 <- NormalizeData(Healthy30)
+Healthy31 <- NormalizeData(Healthy31)
+Healthy32 <- NormalizeData(Healthy32)
+Healthy33 <- NormalizeData(Healthy33)
+Healthy34 <- NormalizeData(Healthy34)
+Healthy35 <- NormalizeData(Healthy35)
+Healthy36 <- NormalizeData(Healthy36)
+Healthy37 <- NormalizeData(Healthy37)
+Healthy38 <- NormalizeData(Healthy38)
+Healthy39 <- NormalizeData(Healthy39)
+Healthy40 <- NormalizeData(Healthy40)
+Healthy41 <- NormalizeData(Healthy41)
+
+
+UC1 <- NormalizeData(UC1)
+UC2 <- NormalizeData(UC2)
+UC3 <- NormalizeData(UC3)
+UC4 <- NormalizeData(UC4)
+UC5 <- NormalizeData(UC5)
+UC6 <- NormalizeData(UC6)
+UC7 <- NormalizeData(UC7)
+UC8 <- NormalizeData(UC8)
+UC9 <- NormalizeData(UC9)
+UC10 <- NormalizeData(UC10)
+UC11 <- NormalizeData(UC11)
+UC12 <- NormalizeData(UC12)
+UC13 <- NormalizeData(UC13)
+UC14 <- NormalizeData(UC14)
+UC15 <- NormalizeData(UC15)
+UC16 <- NormalizeData(UC16)
+UC17 <- NormalizeData(UC17)
+UC18 <- NormalizeData(UC18)
+UC19 <- NormalizeData(UC19)
+UC20 <- NormalizeData(UC20)
+UC21 <- NormalizeData(UC21)
+UC22 <- NormalizeData(UC22)
+UC23 <- NormalizeData(UC23)
+UC24 <- NormalizeData(UC24)
+UC25 <- NormalizeData(UC25)
+UC26 <- NormalizeData(UC26)
+UC27 <- NormalizeData(UC27)
+UC28 <- NormalizeData(UC28)
+UC29 <- NormalizeData(UC29)
+UC30 <- NormalizeData(UC30)
+UC31 <- NormalizeData(UC31)
+UC32 <- NormalizeData(UC32)
+UC33 <- NormalizeData(UC33)
+UC34 <- NormalizeData(UC34)
+UC35 <- NormalizeData(UC35)
+UC36 <- NormalizeData(UC36)
+UC37 <- NormalizeData(UC37)
+UC38 <- NormalizeData(UC38)
+UC39 <- NormalizeData(UC39)
+UC40 <- NormalizeData(UC40)
+UC41 <- NormalizeData(UC41)
+UC42 <- NormalizeData(UC42)
+UC43 <- NormalizeData(UC43)
+UC44 <- NormalizeData(UC44)
+UC45 <- NormalizeData(UC45)
+
+
+Cancer1 <- NormalizeData(Cancer1)
+Cancer2 <- NormalizeData(Cancer2)
+Cancer3 <- NormalizeData(Cancer3)
+Cancer4 <- NormalizeData(Cancer4)
+Cancer5 <- NormalizeData(Cancer5)
+Cancer6 <- NormalizeData(Cancer6)
+Cancer7 <- NormalizeData(Cancer7)
+Cancer8 <- NormalizeData(Cancer8)
+Cancer9 <- NormalizeData(Cancer9)
+Cancer10 <- NormalizeData(Cancer10)
+Cancer11 <- NormalizeData(Cancer11)
+Cancer12 <- NormalizeData(Cancer12)
+Cancer13 <- NormalizeData(Cancer13)
+Cancer14 <- NormalizeData(Cancer14)
+Cancer15 <- NormalizeData(Cancer15)
+Cancer16 <- NormalizeData(Cancer16)
+Cancer17 <- NormalizeData(Cancer17)
+Cancer18 <- NormalizeData(Cancer18)
+Cancer19 <- NormalizeData(Cancer19)
+Cancer20 <- NormalizeData(Cancer20)
+Cancer21 <- NormalizeData(Cancer21)
+Cancer22 <- NormalizeData(Cancer22)
+
+
+
+Healthy1 <- FindVariableFeatures(Healthy1,selection.method = "vst",nfeatures = 2000)
+Healthy2 <- FindVariableFeatures(Healthy2,selection.method = "vst",nfeatures = 2000)
+Healthy3 <- FindVariableFeatures(Healthy3,selection.method = "vst",nfeatures = 2000)
+Healthy4 <- FindVariableFeatures(Healthy4,selection.method = "vst",nfeatures = 2000)
+Healthy5 <- FindVariableFeatures(Healthy5,selection.method = "vst",nfeatures = 2000)
+Healthy6 <- FindVariableFeatures(Healthy6,selection.method = "vst",nfeatures = 2000)
+Healthy7 <- FindVariableFeatures(Healthy7,selection.method = "vst",nfeatures = 2000)
+Healthy8 <- FindVariableFeatures(Healthy8,selection.method = "vst",nfeatures = 2000)
+Healthy9 <- FindVariableFeatures(Healthy9,selection.method = "vst",nfeatures = 2000)
+Healthy10 <- FindVariableFeatures(Healthy10,selection.method = "vst",nfeatures = 2000)
+Healthy11 <- FindVariableFeatures(Healthy11,selection.method = "vst",nfeatures = 2000)
+Healthy12 <- FindVariableFeatures(Healthy12,selection.method = "vst",nfeatures = 2000)
+Healthy13 <- FindVariableFeatures(Healthy13,selection.method = "vst",nfeatures = 2000)
+Healthy14 <- FindVariableFeatures(Healthy14,selection.method = "vst",nfeatures = 2000)
+Healthy15 <- FindVariableFeatures(Healthy15,selection.method = "vst",nfeatures = 2000)
+Healthy16 <- FindVariableFeatures(Healthy16,selection.method = "vst",nfeatures = 2000)
+Healthy17 <- FindVariableFeatures(Healthy17,selection.method = "vst",nfeatures = 2000)
+Healthy18 <- FindVariableFeatures(Healthy18,selection.method = "vst",nfeatures = 2000)
+Healthy19 <- FindVariableFeatures(Healthy19,selection.method = "vst",nfeatures = 2000)
+Healthy20 <- FindVariableFeatures(Healthy20,selection.method = "vst",nfeatures = 2000)
+Healthy21 <- FindVariableFeatures(Healthy21,selection.method = "vst",nfeatures = 2000)
+Healthy22 <- FindVariableFeatures(Healthy22,selection.method = "vst",nfeatures = 2000)
+Healthy23 <- FindVariableFeatures(Healthy23,selection.method = "vst",nfeatures = 2000)
+Healthy24 <- FindVariableFeatures(Healthy24,selection.method = "vst",nfeatures = 2000)
+Healthy25 <- FindVariableFeatures(Healthy25,selection.method = "vst",nfeatures = 2000)
+Healthy26 <- FindVariableFeatures(Healthy26,selection.method = "vst",nfeatures = 2000)
+Healthy27 <- FindVariableFeatures(Healthy27,selection.method = "vst",nfeatures = 2000)
+Healthy28 <- FindVariableFeatures(Healthy28,selection.method = "vst",nfeatures = 2000)
+Healthy29 <- FindVariableFeatures(Healthy29,selection.method = "vst",nfeatures = 2000)
+Healthy30 <- FindVariableFeatures(Healthy30,selection.method = "vst",nfeatures = 2000)
+Healthy31 <- FindVariableFeatures(Healthy31,selection.method = "vst",nfeatures = 2000)
+Healthy32 <- FindVariableFeatures(Healthy32,selection.method = "vst",nfeatures = 2000)
+Healthy33 <- FindVariableFeatures(Healthy33,selection.method = "vst",nfeatures = 2000)
+Healthy34 <- FindVariableFeatures(Healthy34,selection.method = "vst",nfeatures = 2000)
+Healthy35 <- FindVariableFeatures(Healthy35,selection.method = "vst",nfeatures = 2000)
+Healthy36 <- FindVariableFeatures(Healthy36,selection.method = "vst",nfeatures = 2000)
+Healthy37 <- FindVariableFeatures(Healthy37,selection.method = "vst",nfeatures = 2000)
+Healthy38 <- FindVariableFeatures(Healthy38,selection.method = "vst",nfeatures = 2000)
+Healthy39 <- FindVariableFeatures(Healthy39,selection.method = "vst",nfeatures = 2000)
+Healthy40 <- FindVariableFeatures(Healthy40,selection.method = "vst",nfeatures = 2000)
+Healthy41 <- FindVariableFeatures(Healthy41,selection.method = "vst",nfeatures = 2000)
+
+
+
+
+
+UC1<- FindVariableFeatures(UC1,selection.method = "vst",nfeatures = 2000)
+UC2<- FindVariableFeatures(UC2,selection.method = "vst",nfeatures = 2000)
+UC3 <- FindVariableFeatures(UC3,selection.method = "vst",nfeatures = 2000)
+UC4 <- FindVariableFeatures(UC4,selection.method = "vst",nfeatures = 2000)
+UC5 <- FindVariableFeatures(UC5,selection.method = "vst",nfeatures = 2000)
+UC6 <- FindVariableFeatures(UC6,selection.method = "vst",nfeatures = 2000)
+UC7 <- FindVariableFeatures(UC7,selection.method = "vst",nfeatures = 2000)
+UC8 <- FindVariableFeatures(UC8,selection.method = "vst",nfeatures = 2000)
+UC9 <- FindVariableFeatures(UC9,selection.method = "vst",nfeatures = 2000)
+UC10 <- FindVariableFeatures(UC10,selection.method = "vst",nfeatures = 2000)
+UC11 <- FindVariableFeatures(UC11,selection.method = "vst",nfeatures = 2000)
+UC12 <- FindVariableFeatures(UC12,selection.method = "vst",nfeatures = 2000)
+UC13 <- FindVariableFeatures(UC13,selection.method = "vst",nfeatures = 2000)
+UC14 <- FindVariableFeatures(UC14,selection.method = "vst",nfeatures = 2000)
+UC15 <- FindVariableFeatures(UC15,selection.method = "vst",nfeatures = 2000)
+UC16 <- FindVariableFeatures(UC16,selection.method = "vst",nfeatures = 2000)
+UC17 <- FindVariableFeatures(UC17,selection.method = "vst",nfeatures = 2000)
+UC18 <- FindVariableFeatures(UC18,selection.method = "vst",nfeatures = 2000)
+UC19 <- FindVariableFeatures(UC19,selection.method = "vst",nfeatures = 2000)
+UC20 <- FindVariableFeatures(UC20,selection.method = "vst",nfeatures = 2000)
+UC21 <- FindVariableFeatures(UC21,selection.method = "vst",nfeatures = 2000)
+UC22 <- FindVariableFeatures(UC22,selection.method = "vst",nfeatures = 2000)
+UC23 <- FindVariableFeatures(UC23,selection.method = "vst",nfeatures = 2000)
+UC24 <- FindVariableFeatures(UC24,selection.method = "vst",nfeatures = 2000)
+UC25 <- FindVariableFeatures(UC25,selection.method = "vst",nfeatures = 2000)
+UC26 <- FindVariableFeatures(UC26,selection.method = "vst",nfeatures = 2000)
+UC27 <- FindVariableFeatures(UC27,selection.method = "vst",nfeatures = 2000)
+UC28 <- FindVariableFeatures(UC28,selection.method = "vst",nfeatures = 2000)
+UC29 <- FindVariableFeatures(UC29,selection.method = "vst",nfeatures = 2000)
+UC30<- FindVariableFeatures(UC30,selection.method = "vst",nfeatures = 2000)
+UC31<- FindVariableFeatures(UC31,selection.method = "vst",nfeatures = 2000)
+UC32<- FindVariableFeatures(UC32,selection.method = "vst",nfeatures = 2000)
+UC33 <- FindVariableFeatures(UC33,selection.method = "vst",nfeatures = 2000)
+UC34 <- FindVariableFeatures(UC34,selection.method = "vst",nfeatures = 2000)
+UC35 <- FindVariableFeatures(UC35,selection.method = "vst",nfeatures = 2000)
+UC36 <- FindVariableFeatures(UC36,selection.method = "vst",nfeatures = 2000)
+UC37 <- FindVariableFeatures(UC37,selection.method = "vst",nfeatures = 2000)
+UC38 <- FindVariableFeatures(UC38,selection.method = "vst",nfeatures = 2000)
+UC39 <- FindVariableFeatures(UC39,selection.method = "vst",nfeatures = 2000)
+UC40 <- FindVariableFeatures(UC40,selection.method = "vst",nfeatures = 2000)
+UC41 <- FindVariableFeatures(UC41,selection.method = "vst",nfeatures = 2000)
+UC42 <- FindVariableFeatures(UC42,selection.method = "vst",nfeatures = 2000)
+UC43 <- FindVariableFeatures(UC43,selection.method = "vst",nfeatures = 2000)
+UC44 <- FindVariableFeatures(UC44,selection.method = "vst",nfeatures = 2000)
+UC45 <- FindVariableFeatures(UC45,selection.method = "vst",nfeatures = 2000)
+
+
+
+
+
+
+Cancer1 <- FindVariableFeatures(Cancer1,selection.method = "vst",nfeatures = 2000)
+Cancer2 <- FindVariableFeatures(Cancer2,selection.method = "vst",nfeatures = 2000)
+Cancer3 <- FindVariableFeatures(Cancer3,selection.method = "vst",nfeatures = 2000)
+Cancer4 <- FindVariableFeatures(Cancer4,selection.method = "vst",nfeatures = 2000)
+Cancer5 <- FindVariableFeatures(Cancer5,selection.method = "vst",nfeatures = 2000)
+Cancer6 <- FindVariableFeatures(Cancer6,selection.method = "vst",nfeatures = 2000)
+Cancer7 <- FindVariableFeatures(Cancer7,selection.method = "vst",nfeatures = 2000)
+Cancer8 <- FindVariableFeatures(Cancer8,selection.method = "vst",nfeatures = 2000)
+Cancer9 <- FindVariableFeatures(Cancer9,selection.method = "vst",nfeatures = 2000)
+Cancer10 <- FindVariableFeatures(Cancer10,selection.method = "vst",nfeatures = 2000)
+Cancer11 <- FindVariableFeatures(Cancer11,selection.method = "vst",nfeatures = 2000)
+Cancer12 <- FindVariableFeatures(Cancer12,selection.method = "vst",nfeatures = 2000)
+Cancer13 <- FindVariableFeatures(Cancer13,selection.method = "vst",nfeatures = 2000)
+Cancer14 <- FindVariableFeatures(Cancer14,selection.method = "vst",nfeatures = 2000)
+Cancer15 <- FindVariableFeatures(Cancer15,selection.method = "vst",nfeatures = 2000)
+Cancer16 <- FindVariableFeatures(Cancer16,selection.method = "vst",nfeatures = 2000)
+Cancer17 <- FindVariableFeatures(Cancer17,selection.method = "vst",nfeatures = 2000)
+Cancer18 <- FindVariableFeatures(Cancer18,selection.method = "vst",nfeatures = 2000)
+Cancer19 <- FindVariableFeatures(Cancer19,selection.method = "vst",nfeatures = 2000)
+Cancer20 <- FindVariableFeatures(Cancer20,selection.method = "vst",nfeatures = 2000)
+Cancer21 <- FindVariableFeatures(Cancer21,selection.method = "vst",nfeatures = 2000)
+Cancer22 <- FindVariableFeatures(Cancer22,selection.method = "vst",nfeatures = 2000)
+
+
+
+
+
+
+Healthy1 <- ScaleData(Healthy1,features = rownames(Healthy1))
+Healthy2 <- ScaleData(Healthy2,features = rownames(Healthy2))
+Healthy3 <- ScaleData(Healthy3,features = rownames(Healthy3))
+Healthy4 <- ScaleData(Healthy4,features = rownames(Healthy4))
+Healthy5 <- ScaleData(Healthy5,features = rownames(Healthy5))
+Healthy6 <- ScaleData(Healthy6,features = rownames(Healthy6))
+Healthy7 <- ScaleData(Healthy7,features = rownames(Healthy7))
+Healthy8 <- ScaleData(Healthy8,features = rownames(Healthy8))
+Healthy9 <- ScaleData(Healthy9,features = rownames(Healthy9))
+Healthy10 <- ScaleData(Healthy10,features = rownames(Healthy10))
+Healthy11 <- ScaleData(Healthy11,features = rownames(Healthy11))
+Healthy12 <- ScaleData(Healthy12,features = rownames(Healthy12))
+Healthy13 <- ScaleData(Healthy13,features = rownames(Healthy13))
+Healthy14 <- ScaleData(Healthy14,features = rownames(Healthy14))
+Healthy15 <- ScaleData(Healthy15,features = rownames(Healthy15))
+Healthy16 <- ScaleData(Healthy16,features = rownames(Healthy16))
+Healthy17 <- ScaleData(Healthy17,features = rownames(Healthy17))
+Healthy18 <- ScaleData(Healthy18,features = rownames(Healthy18))
+Healthy19 <- ScaleData(Healthy19,features = rownames(Healthy19))
+Healthy20 <- ScaleData(Healthy20,features = rownames(Healthy20))
+Healthy21 <- ScaleData(Healthy21,features = rownames(Healthy21))
+Healthy22 <- ScaleData(Healthy22,features = rownames(Healthy22))
+Healthy23 <- ScaleData(Healthy23,features = rownames(Healthy23))
+Healthy24 <- ScaleData(Healthy24,features = rownames(Healthy24))
+Healthy25 <- ScaleData(Healthy25,features = rownames(Healthy25))
+Healthy26 <- ScaleData(Healthy26,features = rownames(Healthy26))
+Healthy27 <- ScaleData(Healthy27,features = rownames(Healthy27))
+Healthy28 <- ScaleData(Healthy28,features = rownames(Healthy28))
+Healthy29 <- ScaleData(Healthy29,features = rownames(Healthy29))
+Healthy30 <- ScaleData(Healthy30,features = rownames(Healthy30))
+Healthy31 <- ScaleData(Healthy31,features = rownames(Healthy31))
+Healthy32 <- ScaleData(Healthy32,features = rownames(Healthy32))
+Healthy33 <- ScaleData(Healthy33,features = rownames(Healthy33))
+Healthy34 <- ScaleData(Healthy34,features = rownames(Healthy34))
+Healthy35 <- ScaleData(Healthy35,features = rownames(Healthy35))
+Healthy36 <- ScaleData(Healthy36,features = rownames(Healthy36))
+Healthy37 <- ScaleData(Healthy37,features = rownames(Healthy37))
+Healthy38 <- ScaleData(Healthy38,features = rownames(Healthy38))
+Healthy39 <- ScaleData(Healthy39,features = rownames(Healthy39))
+Healthy40 <- ScaleData(Healthy40,features = rownames(Healthy40))
+Healthy41 <- ScaleData(Healthy41,features = rownames(Healthy41))
+
+
+
+
+
+UC1 <- ScaleData(UC1,features = rownames(UC1))
+UC2 <- ScaleData(UC2,features = rownames(UC2))
+UC3 <- ScaleData(UC3,features = rownames(UC3))
+UC4 <- ScaleData(UC4,features = rownames(UC4))
+UC5 <- ScaleData(UC5,features = rownames(UC5))
+UC6 <- ScaleData(UC6,features = rownames(UC6))
+UC7 <- ScaleData(UC7,features = rownames(UC7))
+UC8 <- ScaleData(UC8,features = rownames(UC8))
+UC9 <- ScaleData(UC9,features = rownames(UC9))
+UC10 <- ScaleData(UC10,features = row.names(UC10))
+UC11 <- ScaleData(UC11,features = row.names(UC11))
+UC12 <- ScaleData(UC12,features = row.names(UC12))
+UC13 <- ScaleData(UC13,features = row.names(UC13))
+UC14 <- ScaleData(UC14,features = row.names(UC14))
+UC15 <- ScaleData(UC15,features = rownames(UC15))
+UC16 <- ScaleData(UC16,features = rownames(UC16))
+UC17 <- ScaleData(UC17,features = rownames(UC17))
+UC18 <- ScaleData(UC18,features = rownames(UC18))
+UC19 <- ScaleData(UC19,features = rownames(UC19))
+UC20 <- ScaleData(UC20,features = rownames(UC20))
+UC21 <- ScaleData(UC21,features = rownames(UC21))
+UC22 <- ScaleData(UC22,features = rownames(UC22))
+UC23 <- ScaleData(UC23,features = rownames(UC23))
+UC24 <- ScaleData(UC24,features = rownames(UC24))
+UC25 <- ScaleData(UC25,features = rownames(UC25))
+UC26 <- ScaleData(UC26,features = rownames(UC26))
+UC27 <- ScaleData(UC27,features = rownames(UC27))
+UC28 <- ScaleData(UC28,features = rownames(UC28))
+UC29 <- ScaleData(UC29,features = rownames(UC29))
+UC30 <- ScaleData(UC30,features = rownames(UC30))
+UC31 <- ScaleData(UC31,features = rownames(UC31))
+UC32 <- ScaleData(UC32,features = rownames(UC32))
+UC33 <- ScaleData(UC33,features = rownames(UC33))
+UC34 <- ScaleData(UC34,features = rownames(UC34))
+UC35 <- ScaleData(UC35,features = rownames(UC35))
+UC36 <- ScaleData(UC36,features = rownames(UC36))
+UC37 <- ScaleData(UC37,features = rownames(UC37))
+UC38 <- ScaleData(UC38,features = rownames(UC38))
+UC39 <- ScaleData(UC39,features = rownames(UC39))
+UC40 <- ScaleData(UC40,features = rownames(UC40))
+UC41 <- ScaleData(UC41,features = rownames(UC41))
+UC42 <- ScaleData(UC42,features = rownames(UC42))
+UC43 <- ScaleData(UC43,features = rownames(UC43))
+UC44 <- ScaleData(UC44,features = rownames(UC44))
+UC45 <- ScaleData(UC45,features = rownames(UC45))
+
+
+
+
+Cancer1 <- ScaleData(Cancer1,features = rownames(Cancer1))
+Cancer2 <- ScaleData(Cancer2,features = rownames(Cancer2))
+Cancer3 <- ScaleData(Cancer3,features = rownames(Cancer3))
+Cancer4 <- ScaleData(Cancer4,features = rownames(Cancer4))
+Cancer5 <- ScaleData(Cancer5,features = rownames(Cancer5))
+Cancer6 <- ScaleData(Cancer6,features = rownames(Cancer6))
+Cancer7 <- ScaleData(Cancer7,features = rownames(Cancer7))
+Cancer8 <- ScaleData(Cancer8,features = rownames(Cancer8))
+Cancer9 <- ScaleData(Cancer9,features = rownames(Cancer9))
+Cancer10 <- ScaleData(Cancer10,features = rownames(Cancer10))
+Cancer11 <- ScaleData(Cancer11,features = rownames(Cancer11))
+Cancer12 <- ScaleData(Cancer12,features = rownames(Cancer12))
+Cancer13 <- ScaleData(Cancer13,features = rownames(Cancer13))
+Cancer14 <- ScaleData(Cancer14,features = rownames(Cancer14))
+Cancer15 <- ScaleData(Cancer15,features = rownames(Cancer15))
+Cancer16 <- ScaleData(Cancer16,features = rownames(Cancer16))
+Cancer17 <- ScaleData(Cancer17,features = rownames(Cancer17))
+Cancer18 <- ScaleData(Cancer18,features = rownames(Cancer18))
+Cancer19 <- ScaleData(Cancer19,features = rownames(Cancer19))
+Cancer20 <- ScaleData(Cancer20,features = rownames(Cancer20))
+Cancer21 <- ScaleData(Cancer21,features = rownames(Cancer21))
+Cancer22 <- ScaleData(Cancer22,features = rownames(Cancer22))
+
+
+
+Healthy1 <- RunPCA(Healthy1,features = VariableFeatures(object =  Healthy1))
+Healthy2 <- RunPCA(Healthy2,features = VariableFeatures(object =  Healthy2))
+Healthy3 <- RunPCA(Healthy3,features = VariableFeatures(object =  Healthy3))
+Healthy4 <- RunPCA(Healthy4,features = VariableFeatures(object =  Healthy4))
+Healthy5 <- RunPCA(Healthy5,features = VariableFeatures(object =  Healthy5))
+Healthy6 <- RunPCA(Healthy6,features = VariableFeatures(object =  Healthy6))
+Healthy7 <- RunPCA(Healthy7,features = VariableFeatures(object =  Healthy7))
+Healthy8 <- RunPCA(Healthy8,features = VariableFeatures(object =  Healthy8))
+Healthy9 <- RunPCA(Healthy9,features = VariableFeatures(object =  Healthy9))
+Healthy10 <- RunPCA(Healthy10,features = VariableFeatures(object =  Healthy10))
+Healthy11 <- RunPCA(Healthy11,features = VariableFeatures(object =  Healthy11))
+Healthy12 <- RunPCA(Healthy12,features = VariableFeatures(object =  Healthy12))
+Healthy13 <- RunPCA(Healthy13,features = VariableFeatures(object =  Healthy13))
+Healthy14 <- RunPCA(Healthy14,features = VariableFeatures(object =  Healthy14))
+Healthy15 <- RunPCA(Healthy15,features = VariableFeatures(object =  Healthy15))
+Healthy16 <- RunPCA(Healthy16,features = VariableFeatures(object =  Healthy16))
+Healthy17 <- RunPCA(Healthy17,features = VariableFeatures(object =  Healthy17))
+Healthy18 <- RunPCA(Healthy18,features = VariableFeatures(object =  Healthy18))
+Healthy19 <- RunPCA(Healthy19,features = VariableFeatures(object =  Healthy19))
+Healthy20 <- RunPCA(Healthy20,features = VariableFeatures(object =  Healthy20))
+Healthy21 <- RunPCA(Healthy21,features = VariableFeatures(object =  Healthy21))
+Healthy22 <- RunPCA(Healthy22,features = VariableFeatures(object =  Healthy22))
+Healthy23 <- RunPCA(Healthy23,features = VariableFeatures(object =  Healthy23))
+Healthy24 <- RunPCA(Healthy24,features = VariableFeatures(object =  Healthy24))
+Healthy25 <- RunPCA(Healthy25,features = VariableFeatures(object =  Healthy25))
+Healthy26 <- RunPCA(Healthy26,features = VariableFeatures(object =  Healthy26))
+Healthy27 <- RunPCA(Healthy27,features = VariableFeatures(object =  Healthy27))
+Healthy28 <- RunPCA(Healthy28,features = VariableFeatures(object =  Healthy28))
+Healthy29 <- RunPCA(Healthy29,features = VariableFeatures(object =  Healthy29))
+Healthy30 <- RunPCA(Healthy30,features = VariableFeatures(object =  Healthy30))
+Healthy31 <- RunPCA(Healthy31,features = VariableFeatures(object =  Healthy31))
+Healthy32 <- RunPCA(Healthy32,features = VariableFeatures(object =  Healthy32))
+Healthy33 <- RunPCA(Healthy33,features = VariableFeatures(object =  Healthy33))
+Healthy34 <- RunPCA(Healthy34,features = VariableFeatures(object =  Healthy34))
+Healthy35 <- RunPCA(Healthy35,features = VariableFeatures(object =  Healthy35))
+Healthy36 <- RunPCA(Healthy36,features = VariableFeatures(object =  Healthy36))
+Healthy37 <- RunPCA(Healthy37,features = VariableFeatures(object =  Healthy37))
+Healthy38 <- RunPCA(Healthy38,features = VariableFeatures(object =  Healthy38))
+Healthy39 <- RunPCA(Healthy39,features = VariableFeatures(object =  Healthy39))
+Healthy40 <- RunPCA(Healthy40,features = VariableFeatures(object =  Healthy40))
+Healthy41 <- RunPCA(Healthy41,features = VariableFeatures(object =  Healthy41))
+
+
+
+
+UC1 <- RunPCA(UC1,features = VariableFeatures(object =  UC1))
+UC2 <- RunPCA(UC2,features = VariableFeatures(object =  UC2))
+UC3 <- RunPCA(UC3,features = VariableFeatures(object =  UC3))
+UC4 <- RunPCA(UC4,features = VariableFeatures(object =  UC4))
+UC5 <- RunPCA(UC5,features = VariableFeatures(object =  UC5))
+UC6 <- RunPCA(UC6,features = VariableFeatures(object =  UC6))
+UC7 <- RunPCA(UC7,features = VariableFeatures(object =  UC7))
+UC8 <- RunPCA(UC8,features = VariableFeatures(object =  UC8))
+UC9 <- RunPCA(UC9,features = VariableFeatures(object =  UC9))
+UC10 <- RunPCA(UC10,features = VariableFeatures(object =  UC10))
+UC11 <- RunPCA(UC11,features = VariableFeatures(object =  UC11))
+UC12 <- RunPCA(UC12,features = VariableFeatures(object =  UC12))
+UC13 <- RunPCA(UC13,features = VariableFeatures(object =  UC13))
+UC14 <- RunPCA(UC14,features = VariableFeatures(object =  UC14))
+UC15 <- RunPCA(UC15,features = VariableFeatures(object =  UC15))
+UC16 <- RunPCA(UC16,features = VariableFeatures(object =  UC16))
+UC17 <- RunPCA(UC17,features = VariableFeatures(object =  UC17))
+UC18 <- RunPCA(UC18,features = VariableFeatures(object =  UC18))
+UC19 <- RunPCA(UC19,features = VariableFeatures(object =  UC19))
+UC20 <- RunPCA(UC20,features = VariableFeatures(object =  UC20))
+UC21 <- RunPCA(UC21,features = VariableFeatures(object =  UC21))
+UC22 <- RunPCA(UC22,features = VariableFeatures(object =  UC22))
+UC23 <- RunPCA(UC23,features = VariableFeatures(object =  UC23))
+UC24 <- RunPCA(UC24,features = VariableFeatures(object =  UC24))
+UC25 <- RunPCA(UC25,features = VariableFeatures(object =  UC25))
+UC26 <- RunPCA(UC26,features = VariableFeatures(object =  UC26))
+UC27 <- RunPCA(UC27,features = VariableFeatures(object =  UC27))
+UC28 <- RunPCA(UC28,features = VariableFeatures(object =  UC28))
+UC29 <- RunPCA(UC29,features = VariableFeatures(object =  UC29))
+UC30 <- RunPCA(UC30,features = VariableFeatures(object =  UC30))
+UC31 <- RunPCA(UC31,features = VariableFeatures(object =  UC31))
+UC32 <- RunPCA(UC32,features = VariableFeatures(object =  UC32))
+UC33 <- RunPCA(UC33,features = VariableFeatures(object =  UC33))
+UC34 <- RunPCA(UC34,features = VariableFeatures(object =  UC34))
+UC35 <- RunPCA(UC35,features = VariableFeatures(object =  UC35))
+UC36 <- RunPCA(UC36,features = VariableFeatures(object =  UC36))
+UC37 <- RunPCA(UC37,features = VariableFeatures(object =  UC37))
+UC38 <- RunPCA(UC38,features = VariableFeatures(object =  UC38))
+UC39 <- RunPCA(UC39,features = VariableFeatures(object =  UC39))
+UC40 <- RunPCA(UC40,features = VariableFeatures(object =  UC40))
+UC41 <- RunPCA(UC41,features = VariableFeatures(object =  UC41))
+UC42 <- RunPCA(UC42,features = VariableFeatures(object =  UC42))
+UC43 <- RunPCA(UC43,features = VariableFeatures(object =  UC43))
+UC44 <- RunPCA(UC44,features = VariableFeatures(object =  UC44))
+UC45 <- RunPCA(UC45,features = VariableFeatures(object =  UC45))
+
+
+
+
+
+
+Cancer1 <- RunPCA(Cancer1,features = VariableFeatures(object = Cancer1))
+Cancer2 <- RunPCA(Cancer2,features = VariableFeatures(object = Cancer2))
+Cancer3 <- RunPCA(Cancer3,features = VariableFeatures(object = Cancer3))
+Cancer4 <- RunPCA(Cancer4,features = VariableFeatures(object = Cancer4))
+Cancer5 <- RunPCA(Cancer5,features = VariableFeatures(object = Cancer5))
+Cancer6 <- RunPCA(Cancer6,features = VariableFeatures(object = Cancer6))
+Cancer7 <- RunPCA(Cancer7,features = VariableFeatures(object = Cancer7))
+Cancer8 <- RunPCA(Cancer8,features = VariableFeatures(object = Cancer8))
+Cancer9 <- RunPCA(Cancer9,features = VariableFeatures(object = Cancer9))
+Cancer10 <- RunPCA(Cancer10,features = VariableFeatures(object = Cancer10))
+Cancer11 <- RunPCA(Cancer11,features = VariableFeatures(object = Cancer11))
+Cancer12 <- RunPCA(Cancer12,features = VariableFeatures(object = Cancer12))
+Cancer13 <- RunPCA(Cancer13,features = VariableFeatures(object = Cancer13))
+Cancer14 <- RunPCA(Cancer14,features = VariableFeatures(object = Cancer14))
+Cancer15 <- RunPCA(Cancer15,features = VariableFeatures(object = Cancer15))
+Cancer16 <- RunPCA(Cancer16,features = VariableFeatures(object = Cancer16))
+Cancer17 <- RunPCA(Cancer17,features = VariableFeatures(object = Cancer17))
+Cancer18 <- RunPCA(Cancer18,features = VariableFeatures(object = Cancer18))
+Cancer19 <- RunPCA(Cancer19,features = VariableFeatures(object = Cancer19))
+Cancer20 <- RunPCA(Cancer20,features = VariableFeatures(object = Cancer20))
+Cancer21 <- RunPCA(Cancer21,features = VariableFeatures(object = Cancer21))
+Cancer22 <- RunPCA(Cancer22,features = VariableFeatures(object = Cancer22))
+
+
+
+
+HEA.N21 <- JackStraw(HEA.N21,num.replicate = 100)
+HEA.N21 <- ScoreJackStraw(HEA.N21,dims = 1:20)
+JackStrawPlot(HEA.N21,dims = 1:15)
+ElbowPlot(HEA.N21)
+
+HEA1 <- FindNeighbors(HEA1,dims = 1:15)
+HEA2 <- FindNeighbors(HEA2,dims = 1:15)
+HEA3 <- FindNeighbors(HEA3,dims = 1:15)
+HEA4 <- FindNeighbors(HEA4,dims = 1:15)
+HEA5 <- FindNeighbors(HEA5,dims = 1:15)
+HEA6 <- FindNeighbors(HEA6,dims = 1:15)
+HEA7 <- FindNeighbors(HEA7,dims = 1:15)
+HEA8 <- FindNeighbors(HEA8,dims = 1:15)
+HEA9 <- FindNeighbors(HEA9,dims = 1:15)
+HEA10 <- FindNeighbors(HEA10,dims = 1:15)
+HEA11 <- FindNeighbors(HEA11,dims = 1:15)
+HEA12 <- FindNeighbors(HEA12,dims = 1:15)
+HEA13 <- FindNeighbors(HEA13,dims = 1:15)
+HEA14 <- FindNeighbors(HEA14,dims = 1:15)
+HEA15 <- FindNeighbors(HEA15,dims = 1:15)
+HEA16 <- FindNeighbors(HEA16,dims = 1:15)
+HEA17 <- FindNeighbors(HEA17,dims = 1:15)
+HEA18 <- FindNeighbors(HEA18,dims = 1:15)
+HEA19 <- FindNeighbors(HEA19,dims = 1:15)
+HEA20 <- FindNeighbors(HEA20,dims = 1:15)
+HEA21 <- FindNeighbors(HEA21,dims = 1:15)
+
+
+UC1 <- FindNeighbors(UC1,dims = 1:15)
+UC2 <- FindNeighbors(UC2,dims = 1:15)
+UC3 <- FindNeighbors(UC3,dims = 1:15)
+UC4 <- FindNeighbors(UC4,dims = 1:15)
+UC5 <- FindNeighbors(UC5,dims = 1:15)
+UC6 <- FindNeighbors(UC6,dims = 1:15)
+UC7 <- FindNeighbors(UC7,dims = 1:15)
+UC8 <- FindNeighbors(UC8,dims = 1:15)
+UC9 <- FindNeighbors(UC9,dims = 1:15)
+UC10 <- FindNeighbors(UC10,dims = 1:15)
+UC11 <- FindNeighbors(UC11,dims = 1:15)
+UC12 <- FindNeighbors(UC12,dims = 1:15)
+UC13 <- FindNeighbors(UC13,dims = 1:15)
+UC14 <- FindNeighbors(UC14,dims = 1:15)
+UC15 <- FindNeighbors(UC15,dims = 1:15)
+UC16 <- FindNeighbors(UC16,dims = 1:15)
+UC17 <- FindNeighbors(UC17,dims = 1:15)
+UC18 <- FindNeighbors(UC18,dims = 1:15)
+UC19 <- FindNeighbors(UC19,dims = 1:15)
+UC20 <- FindNeighbors(UC20,dims = 1:15)
+UC21 <- FindNeighbors(UC21,dims = 1:15)
+UC22 <- FindNeighbors(UC22,dims = 1:15)
+UC23 <- FindNeighbors(UC23,dims = 1:15)
+UC24 <- FindNeighbors(UC24,dims = 1:15)
+UC25 <- FindNeighbors(UC25,dims = 1:15)
+UC26 <- FindNeighbors(UC26,dims = 1:15)
+UC27 <- FindNeighbors(UC27,dims = 1:15)
+UC28 <- FindNeighbors(UC28,dims = 1:15)
+UC29 <- FindNeighbors(UC29,dims = 1:15)
+UC30 <- FindNeighbors(UC30,dims = 1:15)
+UC31 <- FindNeighbors(UC31,dims = 1:15)
+UC32 <- FindNeighbors(UC32,dims = 1:15)
+UC33 <- FindNeighbors(UC33,dims = 1:15)
+UC34 <- FindNeighbors(UC34,dims = 1:15)
+UC35 <- FindNeighbors(UC35,dims = 1:15)
+UC36 <- FindNeighbors(UC36,dims = 1:15)
+UC37 <- FindNeighbors(UC37,dims = 1:15)
+UC38 <- FindNeighbors(UC38,dims = 1:15)
+UC39 <- FindNeighbors(UC39,dims = 1:15)
+UC40 <- FindNeighbors(UC40,dims = 1:15)
+UC41 <- FindNeighbors(UC41,dims = 1:15)
+UC42 <- FindNeighbors(UC42,dims = 1:15)
+UC43 <- FindNeighbors(UC43,dims = 1:15)
+UC44 <- FindNeighbors(UC44,dims = 1:15)
+UC45 <- FindNeighbors(UC45,dims = 1:15)
+UC1 <- FindClusters(UC1,resolution = 0.5)
+UC2 <- FindClusters(UC2,resolution = 0.5)
+UC3 <- FindClusters(UC3,resolution = 0.5)
+UC4 <- FindClusters(UC4,resolution = 0.5)
+UC5 <- FindClusters(UC5,resolution = 0.5)
+UC6 <- FindClusters(UC6,resolution = 0.5)
+UC7 <- FindClusters(UC7,resolution = 0.5)
+UC8 <- FindClusters(UC8,resolution = 0.5)
+UC9 <- FindClusters(UC9,resolution = 0.5)
+UC10 <- FindClusters(UC10,resolution = 0.5)
+UC11 <- FindClusters(UC11,resolution = 0.5)
+UC12 <- FindClusters(UC12,resolution = 0.5)
+UC13 <- FindClusters(UC13,resolution = 0.5)
+UC14 <- FindClusters(UC14,resolution = 0.5)
+UC15 <- FindClusters(UC15,resolution = 0.5)
+UC16 <- FindClusters(UC16,resolution = 0.5)
+UC17 <- FindClusters(UC17,resolution = 0.5)
+UC18 <- FindClusters(UC18,resolution = 0.5)
+UC19 <- FindClusters(UC19,resolution = 0.5)
+UC20 <- FindClusters(UC20,resolution = 0.5)
+UC21 <- FindClusters(UC21,resolution = 0.5)
+UC22 <- FindClusters(UC22,resolution = 0.5)
+UC23 <- FindClusters(UC23,resolution = 0.5)
+UC24 <- FindClusters(UC24,resolution = 0.5)
+UC25 <- FindClusters(UC25,resolution = 0.5)
+UC26 <- FindClusters(UC26,resolution = 0.5)
+UC27 <- FindClusters(UC27,resolution = 0.5)
+UC28 <- FindClusters(UC28,resolution = 0.5)
+UC29 <- FindClusters(UC29,resolution = 0.5)
+UC30 <- FindClusters(UC30,resolution = 0.5)
+UC31 <- FindClusters(UC31,resolution = 0.5)
+UC32 <- FindClusters(UC32,resolution = 0.5)
+UC33 <- FindClusters(UC33,resolution = 0.5)
+UC34 <- FindClusters(UC34,resolution = 0.5)
+UC35 <- FindClusters(UC35,resolution = 0.5)
+UC36 <- FindClusters(UC36,resolution = 0.5)
+UC37 <- FindClusters(UC37,resolution = 0.5)
+UC38 <- FindClusters(UC38,resolution = 0.5)
+UC39 <- FindClusters(UC39,resolution = 0.5)
+UC40 <- FindClusters(UC40,resolution = 0.5)
+UC41 <- FindClusters(UC41,resolution = 0.5)
+UC42 <- FindClusters(UC42,resolution = 0.5)
+UC43 <- FindClusters(UC43,resolution = 0.5)
+UC44 <- FindClusters(UC44,resolution = 0.5)
+UC45 <- FindClusters(UC45,resolution = 0.5)
+UC1 <- RunUMAP(UC1,dims = 1:15)
+UC2 <- RunUMAP(UC2,dims = 1:15)
+UC3 <- RunUMAP(UC3,dims = 1:15)
+UC4 <- RunUMAP(UC4,dims = 1:15)
+UC5 <- RunUMAP(UC5,dims = 1:15)
+UC6 <- RunUMAP(UC6,dims = 1:15)
+UC7 <- RunUMAP(UC7,dims = 1:15)
+UC8 <- RunUMAP(UC8,dims = 1:15)
+UC9 <- RunUMAP(UC9,dims = 1:15)
+UC10 <- RunUMAP(UC10,dims = 1:15)
+UC11 <- RunUMAP(UC11,dims = 1:15)
+UC12 <- RunUMAP(UC12,dims = 1:15)
+UC13 <- RunUMAP(UC13,dims = 1:15)
+UC14 <- RunUMAP(UC14,dims = 1:15)
+UC15 <- RunUMAP(UC15,dims = 1:15)
+UC16 <- RunUMAP(UC16,dims = 1:15)
+UC17 <- RunUMAP(UC17,dims = 1:15)
+UC18 <- RunUMAP(UC18,dims = 1:15)
+UC19 <- RunUMAP(UC19,dims = 1:15)
+UC20 <- RunUMAP(UC20,dims = 1:15)
+UC21 <- RunUMAP(UC21,dims = 1:15)
+UC22 <- RunUMAP(UC22,dims = 1:15)
+UC23 <- RunUMAP(UC23,dims = 1:15)
+UC24 <- RunUMAP(UC24,dims = 1:15)
+UC25 <- RunUMAP(UC25,dims = 1:15)
+UC26 <- RunUMAP(UC26,dims = 1:15)
+UC27 <- RunUMAP(UC27,dims = 1:15)
+UC28 <- RunUMAP(UC28,dims = 1:15)
+UC29 <- RunUMAP(UC29,dims = 1:15)
+UC30 <- RunUMAP(UC30,dims = 1:15)
+UC31 <- RunUMAP(UC31,dims = 1:15)
+UC32 <- RunUMAP(UC32,dims = 1:15)
+UC33 <- RunUMAP(UC33,dims = 1:15)
+UC34 <- RunUMAP(UC34,dims = 1:15)
+UC35 <- RunUMAP(UC35,dims = 1:15)
+UC36 <- RunUMAP(UC36,dims = 1:15)
+UC37 <- RunUMAP(UC37,dims = 1:15)
+UC38 <- RunUMAP(UC38,dims = 1:15)
+UC39 <- RunUMAP(UC39,dims = 1:15)
+UC40 <- RunUMAP(UC40,dims = 1:15)
+UC41 <- RunUMAP(UC41,dims = 1:15)
+UC42 <- RunUMAP(UC42,dims = 1:15)
+UC43 <- RunUMAP(UC43,dims = 1:15)
+UC44 <- RunUMAP(UC44,dims = 1:15)
+UC45 <- RunUMAP(UC45,dims = 1:15)
+
+
+
+
+
+Cancer1 <- FindNeighbors(Cancer1,dims = 1:15)
+Cancer2 <- FindNeighbors(Cancer2,dims = 1:15)
+Cancer3 <- FindNeighbors(Cancer3,dims = 1:15)
+Cancer4 <- FindNeighbors(Cancer4,dims = 1:15)
+Cancer5 <- FindNeighbors(Cancer5,dims = 1:15)
+Cancer6 <- FindNeighbors(Cancer6,dims = 1:15)
+Cancer7 <- FindNeighbors(Cancer7,dims = 1:15)
+Cancer8 <- FindNeighbors(Cancer8,dims = 1:15)
+Cancer9 <- FindNeighbors(Cancer9,dims = 1:15)
+Cancer10 <- FindNeighbors(Cancer10,dims = 1:15)
+Cancer11 <- FindNeighbors(Cancer11,dims = 1:15)
+Cancer12 <- FindNeighbors(Cancer12,dims = 1:15)
+Cancer13 <- FindNeighbors(Cancer13,dims = 1:15)
+Cancer14 <- FindNeighbors(Cancer14,dims = 1:15)
+Cancer15 <- FindNeighbors(Cancer15,dims = 1:15)
+Cancer16 <- FindNeighbors(Cancer16,dims = 1:15)
+Cancer17 <- FindNeighbors(Cancer17,dims = 1:15)
+Cancer18 <- FindNeighbors(Cancer18,dims = 1:15)
+Cancer19 <- FindNeighbors(Cancer19,dims = 1:15)
+Cancer20 <- FindNeighbors(Cancer20,dims = 1:15)
+Cancer21 <- FindNeighbors(Cancer21,dims = 1:15)
+Cancer22 <- FindNeighbors(Cancer22,dims = 1:15)
+
+
+
+HEA1 <- FindClusters(HEA1,resolution = 0.5)
+HEA2 <- FindClusters(HEA2,resolution = 0.5)
+HEA3 <- FindClusters(HEA3,resolution = 0.5)
+HEA4 <- FindClusters(HEA4,resolution = 0.5)
+HEA5 <- FindClusters(HEA5,resolution = 0.5)
+HEA6 <- FindClusters(HEA6,resolution = 0.5)
+HEA7 <- FindClusters(HEA7,resolution = 0.5)
+HEA8 <- FindClusters(HEA8,resolution = 0.5)
+HEA9 <- FindClusters(HEA9,resolution = 0.5)
+HEA10 <- FindClusters(HEA10,resolution = 0.5)
+HEA11 <- FindClusters(HEA11,resolution = 0.5)
+HEA12 <- FindClusters(HEA12,resolution = 0.5)
+HEA13 <- FindClusters(HEA13,resolution = 0.5)
+HEA14 <- FindClusters(HEA14,resolution = 0.5)
+HEA15 <- FindClusters(HEA15,resolution = 0.5)
+HEA16 <- FindClusters(HEA16,resolution = 0.5)
+HEA17 <- FindClusters(HEA17,resolution = 0.5)
+HEA18 <- FindClusters(HEA18,resolution = 0.5)
+HEA19 <- FindClusters(HEA19,resolution = 0.5)
+HEA20 <- FindClusters(HEA20,resolution = 0.5)
+HEA21 <- FindClusters(HEA21,resolution = 0.5)
+                        
+UC1 <- FindClusters(UC1,resolution = 0.5)
+UC2 <- FindClusters(UC2,resolution = 0.5)
+UC3 <- FindClusters(UC3,resolution = 0.5)
+UC4 <- FindClusters(UC4,resolution = 0.5)
+UC5 <- FindClusters(UC5,resolution = 0.5)
+UC6 <- FindClusters(UC6,resolution = 0.5)
+UC7 <- FindClusters(UC7,resolution = 0.5)
+UC8 <- FindClusters(UC8,resolution = 0.5)
+UC9 <- FindClusters(UC9,resolution = 0.5)
+UC10 <- FindClusters(UC10,resolution = 0.5)
+UC11 <- FindClusters(UC11,resolution = 0.5)
+UC12 <- FindClusters(UC12,resolution = 0.5)
+UC13 <- FindClusters(UC13,resolution = 0.5)
+UC14 <- FindClusters(UC14,resolution = 0.5)
+UC15 <- FindClusters(UC15,resolution = 0.5)
+UC16 <- FindClusters(UC16,resolution = 0.5)
+UC17 <- FindClusters(UC17,resolution = 0.5)
+UC18 <- FindClusters(UC18,resolution = 0.5)
+UC19 <- FindClusters(UC19,resolution = 0.5)
+UC20 <- FindClusters(UC20,resolution = 0.5)
+UC21 <- FindClusters(UC21,resolution = 0.5)
+UC22 <- FindClusters(UC22,resolution = 0.5)
+UC23 <- FindClusters(UC23,resolution = 0.5)
+UC24 <- FindClusters(UC24,resolution = 0.5)
+UC25 <- FindClusters(UC25,resolution = 0.5)
+UC26 <- FindClusters(UC26,resolution = 0.5)
+UC27 <- FindClusters(UC27,resolution = 0.5)
+
+
+
+
+
+Cancer1 <- FindClusters(Cancer1,resolution = 0.5)
+Cancer2 <- FindClusters(Cancer2,resolution = 0.5)
+Cancer3 <- FindClusters(Cancer3,resolution = 0.5)
+Cancer4 <- FindClusters(Cancer4,resolution = 0.5)
+Cancer5 <- FindClusters(Cancer5,resolution = 0.5)
+Cancer6 <- FindClusters(Cancer6,resolution = 0.5)
+Cancer7 <- FindClusters(Cancer7,resolution = 0.5)
+Cancer8 <- FindClusters(Cancer8,resolution = 0.5)
+Cancer9 <- FindClusters(Cancer9,resolution = 0.5)
+Cancer10 <- FindClusters(Cancer10,resolution = 0.5)
+Cancer11 <- FindClusters(Cancer11,resolution = 0.5)
+Cancer12 <- FindClusters(Cancer12,resolution = 0.5)
+Cancer13 <- FindClusters(Cancer13,resolution = 0.5)
+Cancer14 <- FindClusters(Cancer14,resolution = 0.5)
+Cancer15 <- FindClusters(Cancer15,resolution = 0.5)
+Cancer16 <- FindClusters(Cancer16,resolution = 0.5)
+Cancer17 <- FindClusters(Cancer17,resolution = 0.5)
+Cancer18 <- FindClusters(Cancer18,resolution = 0.5)
+Cancer19 <- FindClusters(Cancer19,resolution = 0.5)
+Cancer20 <- FindClusters(Cancer20,resolution = 0.5)
+Cancer21 <- FindClusters(Cancer21,resolution = 0.5)
+Cancer22 <- FindClusters(Cancer22,resolution = 0.5)
+
+
+
+
+
+
+
+HEA1 <- RunUMAP(HEA1,dims = 1:15)
+HEA2 <- RunUMAP(HEA2,dims = 1:15)
+HEA3 <- RunUMAP(HEA3,dims = 1:15)
+HEA4 <- RunUMAP(HEA4,dims = 1:15)
+HEA5 <- RunUMAP(HEA5,dims = 1:15)
+HEA6 <- RunUMAP(HEA6,dims = 1:15)
+HEA7 <- RunUMAP(HEA7,dims = 1:15)
+HEA8 <- RunUMAP(HEA8,dims = 1:15)
+HEA9 <- RunUMAP(HEA9,dims = 1:15)
+HEA10 <- RunUMAP(HEA10,dims = 1:15)
+HEA11 <- RunUMAP(HEA11,dims = 1:15)
+HEA12 <- RunUMAP(HEA12,dims = 1:15)
+HEA13 <- RunUMAP(HEA13,dims = 1:15)
+HEA14 <- RunUMAP(HEA14,dims = 1:15)
+HEA15 <- RunUMAP(HEA15,dims = 1:15)
+HEA16 <- RunUMAP(HEA16,dims = 1:15)
+HEA17 <- RunUMAP(HEA17,dims = 1:15)
+HEA18 <- RunUMAP(HEA18,dims = 1:15)
+HEA19 <- RunUMAP(HEA19,dims = 1:15)
+HEA20 <- RunUMAP(HEA20,dims = 1:15)
+HEA21 <- RunUMAP(HEA21,dims = 1:15)
+
+
+
+
+UC1 <- RunUMAP(UC1,dims = 1:15)
+UC2 <- RunUMAP(UC2,dims = 1:15)
+UC3 <- RunUMAP(UC3,dims = 1:15)
+UC4 <- RunUMAP(UC4,dims = 1:15)
+UC5 <- RunUMAP(UC5,dims = 1:15)
+UC6 <- RunUMAP(UC6,dims = 1:15)
+UC7 <- RunUMAP(UC7,dims = 1:15)
+UC8 <- RunUMAP(UC8,dims = 1:15)
+UC9 <- RunUMAP(UC9,dims = 1:15)
+UC10 <- RunUMAP(UC10,dims = 1:15)
+UC11 <- RunUMAP(UC11,dims = 1:15)
+UC12 <- RunUMAP(UC12,dims = 1:15)
+UC13 <- RunUMAP(UC13,dims = 1:15)
+UC14 <- RunUMAP(UC14,dims = 1:15)
+UC15 <- RunUMAP(UC15,dims = 1:15)
+UC16 <- RunUMAP(UC16,dims = 1:15)
+UC17 <- RunUMAP(UC17,dims = 1:15)
+UC18 <- RunUMAP(UC18,dims = 1:15)
+UC19 <- RunUMAP(UC19,dims = 1:15)
+UC20 <- RunUMAP(UC20,dims = 1:15)
+UC21 <- RunUMAP(UC21,dims = 1:15)
+UC22 <- RunUMAP(UC22,dims = 1:15)
+UC23 <- RunUMAP(UC23,dims = 1:15)
+UC24 <- RunUMAP(UC24,dims = 1:15)
+UC25 <- RunUMAP(UC25,dims = 1:15)
+UC26 <- RunUMAP(UC26,dims = 1:15)
+UC27 <- RunUMAP(UC27,dims = 1:15)
+
+
+
+
+Cancer1 <- RunUMAP(Cancer1,dims = 1:15)
+Cancer2 <- RunUMAP(Cancer2,dims = 1:15)
+Cancer3 <- RunUMAP(Cancer3,dims = 1:15)
+Cancer4 <- RunUMAP(Cancer4,dims = 1:15)
+Cancer5 <- RunUMAP(Cancer5,dims = 1:15)
+Cancer6 <- RunUMAP(Cancer6,dims = 1:15)
+Cancer7 <- RunUMAP(Cancer7,dims = 1:15)
+Cancer8 <- RunUMAP(Cancer8,dims = 1:15)
+Cancer9 <- RunUMAP(Cancer9,dims = 1:15)
+Cancer10 <- RunUMAP(Cancer10,dims = 1:15)
+Cancer11 <- RunUMAP(Cancer11,dims = 1:15)
+Cancer12 <- RunUMAP(Cancer12,dims = 1:15)
+Cancer13 <- RunUMAP(Cancer13,dims = 1:15)
+Cancer14 <- RunUMAP(Cancer14,dims = 1:15)
+Cancer15 <- RunUMAP(Cancer15,dims = 1:15)
+Cancer16 <- RunUMAP(Cancer16,dims = 1:15)
+Cancer17 <- RunUMAP(Cancer17,dims = 1:15)
+Cancer18 <- RunUMAP(Cancer18,dims = 1:15)
+Cancer19 <- RunUMAP(Cancer19,dims = 1:15)
+Cancer20 <- RunUMAP(Cancer20,dims = 1:15)
+Cancer21 <- RunUMAP(Cancer21,dims = 1:15)
+Cancer22 <- RunUMAP(Cancer22,dims = 1:15)
+
+
+
+
+
+
+sweep.res.list <- paramSweep_v3(Cancer5,PCs = 1:15,sct = TRUE)
+sweep.stats <- summarizeSweep(sweep.res.list,GT = FALSE)
+bcmvn <- find.pK(sweep.stats)
+pk_pcmvn <- bcmvn$pK[which.max(bcmvn$BCmetric)] %>% as.character() %>% as.numeric()
+
+DoubletRate <- 0.008
+homotypic.prop <- modelHomotypic(Cancer5$seurat_clusters)
+nExp_poi <- round(DoubletRate*ncol(Cancer5))
+nExp_poi.adj <- round(nExp_poi*1-homotypic.prop)
+
+Cancer5 <- doubletFinder_v3(Cancer5,PCs = 1:15,pN = 0.25,pK = pk_pcmvn,
+                          nExp = nExp_poi.adj,reuse.pANN = FALSE,sct = TRUE)
+
+DimPlot(Cancer5,reduction = "umap",group.by = "DF.classifications_0.25_0.03_9")
+Cancer5 <- subset(Cancer5, subset=DF.classifications_0.25_0.03_9=='Singlet')
+
+
+
+UC <- List(UC1,UC2,UC3,UC4,UC5,UC6,UC7,UC8,UC9,UC10,
+           UC11,UC12,UC13,UC14,UC15,UC16,UC17,UC18,UC19,UC20,
+           UC21,UC22,UC23,UC24,UC25,UC26,UC27,UC28,UC29,UC30,
+           UC31,UC32,UC33,UC34,UC35,UC36,UC37,UC38,UC39,UC40,
+           UC41,UC42,UC43,UC44,UC45)
+
+doubletratio <- c()
+for (i in 1:length(combine)) {
+  doubletratio[i] <- (combine[[i]]@meta.data %>% nrow()) / 500 * 0.004
+}
+
+
+DelDoublet <- function(SeuratObject, DoubletRate){
+  sweep.res.list <- paramSweep_v3(SeuratObject, PCs = pc.num, sct = F)
+  sweep.stats <- summarizeSweep(sweep.res.list, GT = FALSE)  
+  bcmvn <- find.pK(sweep.stats)
+  pK_bcmvn <- bcmvn$pK[which.max(bcmvn$BCmetric)] %>% as.character() %>% as.numeric()
+  
+  ## 排除不能检出的同源doublets，优化期望的doublets数量
+  homotypic.prop <- modelHomotypic(SeuratObject$seurat_clusters)   # 最好提供celltype
+  nExp_poi <- round(DoubletRate*ncol(SeuratObject)) 
+  nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
+  SeuratObject <- doubletFinder_v3(SeuratObject, PCs = pc.num, pN = 0.25, pK = pK_bcmvn, 
+                                   nExp = nExp_poi.adj, reuse.pANN = F, sct = F)
+  return(SeuratObject)
+}
+pc.num <- 1:15
+
+
+Cancer6 <-  DelDoublet(SeuratObject = Cancer6,DoubletRate = 0.009)
+Cancer7 <- DelDoublet(SeuratObject = Cancer7,DoubletRate = 0.076)
+Cancer8 <- DelDoublet(SeuratObject = Cancer8,DoubletRate = 0.061)
+Cancer9 <- DelDoublet(SeuratObject = Cancer9,DoubletRate = 0.016)
+Cancer10 <- DelDoublet(SeuratObject = Cancer10,DoubletRate = 0.027)
+Cancer11 <- DelDoublet(SeuratObject = Cancer11,DoubletRate = 0.058)
+Cancer12 <- DelDoublet(SeuratObject = Cancer12,DoubletRate = 0.047)
+Cancer13 <- DelDoublet(SeuratObject = Cancer13,DoubletRate = 0.006)
+Cancer14 <- DelDoublet(SeuratObject = Cancer14,DoubletRate = 0.035)
+Cancer15 <- DelDoublet(SeuratObject = Cancer15,DoubletRate = 0.002)
+Cancer16 <- DelDoublet(SeuratObject = Cancer16,DoubletRate = 0.002)
+Cancer17 <- DelDoublet(SeuratObject = Cancer17,DoubletRate = 0.076)
+Cancer18 <- DelDoublet(SeuratObject = Cancer18,DoubletRate = 0.084)
+Cancer19 <- DelDoublet(SeuratObject = Cancer19,DoubletRate = 0.009)
+Cancer20 <- DelDoublet(SeuratObject = Cancer20,DoubletRate = 0.021)
+Cancer21 <- DelDoublet(SeuratObject = Cancer21,DoubletRate = 0.052)
+Cancer22 <- DelDoublet(SeuratObject = Cancer22,DoubletRate = 0.037)
+
+
+
+
+UC1 <- DelDoublet(SeuratObject = UC1,DoubletRate =0.005 )
+UC2 <- DelDoublet(SeuratObject = UC2,DoubletRate = 0.009)
+UC4 <- DelDoublet(SeuratObject = UC4,DoubletRate = 0.004)
+UC5 <- DelDoublet(SeuratObject = UC5,DoubletRate = 0.002)
+UC6 <- DelDoublet(SeuratObject = UC6,DoubletRate = 0.02)
+UC7 <- DelDoublet(SeuratObject = UC7,DoubletRate = 0.019)
+UC8 <- DelDoublet(SeuratObject = UC8,DoubletRate = 0.023)
+UC9 <- DelDoublet(SeuratObject = UC9,DoubletRate = 0.02)
+UC10 <- DelDoublet(SeuratObject = UC10,DoubletRate = 0.017)
+UC11 <- DelDoublet(SeuratObject = UC11,DoubletRate = 0.023)
+UC12 <- DelDoublet(SeuratObject = UC12,DoubletRate = 0.019)
+UC13 <- DelDoublet(SeuratObject = UC13,DoubletRate = 0.008)
+UC14 <- DelDoublet(SeuratObject = UC14,DoubletRate = 0.012)
+UC15 <- DelDoublet(SeuratObject = UC15,DoubletRate = 0.003)
+UC16 <- DelDoublet(SeuratObject = UC16,DoubletRate = 0.004)
+UC17 <- DelDoublet(SeuratObject = UC17,DoubletRate = 0.007)
+UC18 <- DelDoublet(SeuratObject = UC18,DoubletRate = 0.023)
+UC19 <- DelDoublet(SeuratObject = UC19,DoubletRate = 0.04)
+UC20 <- DelDoublet(SeuratObject = UC20,DoubletRate = 0.031)
+UC21 <- DelDoublet(SeuratObject = UC21,DoubletRate = 0.003)
+UC22 <- DelDoublet(SeuratObject = UC22,DoubletRate = 0.009)
+UC23 <- DelDoublet(SeuratObject = UC23,DoubletRate = 0.012)
+UC24 <- DelDoublet(SeuratObject = UC24,DoubletRate = 0.008)
+UC25 <- DelDoublet(SeuratObject = UC25,DoubletRate = 0.007)
+UC26 <- DelDoublet(SeuratObject = UC26,DoubletRate = 0.009)
+UC27 <- DelDoublet(SeuratObject = UC27,DoubletRate = 0.016)
+UC28 <- DelDoublet(SeuratObject = UC28,DoubletRate = 0.017)
+UC29 <- DelDoublet(SeuratObject = UC29,DoubletRate = 0.013)
+UC30 <- DelDoublet(SeuratObject = UC30,DoubletRate = 0.009)
+UC31 <- DelDoublet(SeuratObject = UC31,DoubletRate = 0.007)
+UC32 <- DelDoublet(SeuratObject = UC32,DoubletRate = 0.011)
+
+
+
+
+
+
+
+Cancer6 <- subset(Cancer6, subset=DF.classifications_0.25_0.18_10=='Singlet')
+Cancer7 <- subset(Cancer7, subset=DF.classifications_0.25_0.12_699=='Singlet')
+Cancer8 <- subset(Cancer8, subset=DF.classifications_0.25_0.005_428=='Singlet')
+Cancer9 <- subset(Cancer9, subset=DF.classifications_0.25_0.01_28=='Singlet')
+Cancer10 <- subset(Cancer10, subset=DF.classifications_0.25_0.005_83=='Singlet')
+Cancer11 <- subset(Cancer11, subset=DF.classifications_0.25_0.005_374=='Singlet')
+Cancer12 <- subset(Cancer12, subset=DF.classifications_0.25_0.005_258=='Singlet')
+Cancer13 <- subset(Cancer13, subset=DF.classifications_0.25_0.03_2=='Singlet')
+Cancer14 <- subset(Cancer14, subset=DF.classifications_0.25_0.01_138=='Singlet')
+Cancer15 <- subset(Cancer15, subset=DF.classifications_0.25_0.04_1=='Singlet')
+Cancer16 <- subset(Cancer16, subset=DF.classifications_0.25_0.04_1=='Singlet')
+Cancer17 <- subset(Cancer17, subset=DF.classifications_0.25_0.005_644=='Singlet')
+Cancer18 <- subset(Cancer18, subset=DF.classifications_0.25_0.005_799=='Singlet')
+Cancer19 <- subset(Cancer19, subset=DF.classifications_0.25_0.03_10=='Singlet')
+Cancer20 <- subset(Cancer20, subset=DF.classifications_0.25_0.01_53=='Singlet')
+Cancer21 <- subset(Cancer21, subset=DF.classifications_0.25_0.005_324=='Singlet')
+Cancer22 <- subset(Cancer22, subset=DF.classifications_0.25_0.02_156=='Singlet')
+
+CD1 <- subset(CD1, subset=DF.classifications_0.25_0.04_80=='Singlet')
+CD2 <- subset(CD2, subset=DF.classifications_0.25_0.28_1=='Singlet')
+CD3 <- subset(CD3, subset=DF.classifications_0.25_0.01_35=='Singlet')
+CD4 <- subset(CD4, subset=DF.classifications_0.25_0.01_95=='Singlet')
+CD5 <- subset(CD5, subset=DF.classifications_0.25_0.04_37=='Singlet')
+CD6 <- subset(CD6, subset=DF.classifications_0.25_0.005_574=='Singlet')
+CD7 <- subset(CD7, subset=DF.classifications_0.25_0.27_49=='Singlet')
+CD8 <- subset(CD8, subset=DF.classifications_0.25_0.01_59=='Singlet')
+CD9 <- subset(CD9, subset=DF.classifications_0.25_0.005_237=='Singlet')
+CD10 <- subset(CD10, subset=DF.classifications_0.25_0.27_12=='Singlet')
+CD11 <- subset(CD11, subset=DF.classifications_0.25_0.01_39=='Singlet')
+CD12 <- subset(CD12, subset=DF.classifications_0.25_0.02_9=='Singlet')
+CD13 <- subset(CD13, subset=DF.classifications_0.25_0.005_87=='Singlet')
+CD16 <- subset(CD16, subset=DF.classifications_0.25_0.11_1=='Singlet')
+CD17 <- subset(CD17, subset=DF.classifications_0.25_0.01_30=='Singlet')
+
+UC1 <- subset(UC1, subset=DF.classifications_0.25_0.04_2=='Singlet')
+UC6 <- subset(UC6, subset=DF.classifications_0.25_0.16_44=='Singlet')
+UC7 <- subset(UC7, subset=DF.classifications_0.25_0.02_37=='Singlet')
+UC8 <- subset(UC8, subset=DF.classifications_0.25_0.21_60=='Singlet')
+UC9 <- subset(UC9, subset=DF.classifications_0.25_0.01_47=='Singlet')
+UC10 <- subset(UC10, subset=DF.classifications_0.25_0.02_33=='Singlet')
+UC11 <- subset(UC11, subset=DF.classifications_0.25_0.01_59=='Singlet')
+UC12 <- subset(UC12, subset=DF.classifications_0.25_0.02_39=='Singlet')
+UC13 <- subset(UC13, subset=DF.classifications_0.25_0.03_7=='Singlet')
+UC14 <- subset(UC14, subset=DF.classifications_0.25_0.04_14=='Singlet')
+UC15 <- subset(UC15, subset=DF.classifications_0.25_0.26_1=='Singlet')
+UC16 <- subset(UC16, subset=DF.classifications_0.25_0.08_2=='Singlet')
+UC17 <- subset(UC17, subset=DF.classifications_0.25_0.24_6=='Singlet')
+UC18 <- subset(UC18, subset=DF.classifications_0.25_0.01_61=='Singlet')
+UC19 <- subset(UC19, subset=DF.classifications_0.25_0.005_190=='Singlet')
+UC20 <- subset(UC20, subset=DF.classifications_0.25_0.03_111=='Singlet')
+UC21 <- subset(UC21, subset=DF.classifications_0.25_0.3_1=='Singlet')
+UC22 <- subset(UC22, subset=DF.classifications_0.25_0.05_9=='Singlet')
+UC23 <- subset(UC23, subset=DF.classifications_0.25_0.03_15=='Singlet')
+UC24 <- subset(UC24, subset=DF.classifications_0.25_0.03_8=='Singlet')
+UC25 <- subset(UC25, subset=DF.classifications_0.25_0.04_5=='Singlet')
+UC26 <- subset(UC26, subset=DF.classifications_0.25_0.04_9=='Singlet')
+UC27 <- subset(UC27, subset=DF.classifications_0.25_0.03_28=='Singlet')
+UC28 <- subset(UC28, subset=DF.classifications_0.25_0.02_31=='Singlet')
+UC29 <- subset(UC29, subset=DF.classifications_0.25_0.19_19=='Singlet')
+UC30 <- subset(UC30, subset=DF.classifications_0.25_0.03_9=='Singlet')
+UC31 <- subset(UC31, subset=DF.classifications_0.25_0.02_6=='Singlet')
+UC32 <- subset(UC32, subset=DF.classifications_0.25_0.03_12=='Singlet')
+
+
+
+Allsamples <- merge(Cancer7,y=c(Cancer1,Cancer2,Cancer3,Cancer4,Cancer5,
+                                Cancer7,Cancer8,Cancer9,Cancer10,
+                                Cancer11,Cancer12,Cancer13,Cancer14,Cancer15,
+                                Cancer16,Cancer17,Cancer18,Cancer19,Cancer20,
+                                Cancer21,Cancer22,Cancer23,Cancer24,Cancer25,
+                                Cancer26,Cancer27,Cancer28,Cancer29,Cancer30,
+                                Cancer31,Cancer32,Cancer33,Cancer34,Cancer35,
+                                Cancer36,Cancer37,Cancer38,Cancer39,Cancer40,
+                                Cancer41,Cancer42,Cancer43,Cancer44,Cancer45,
+                                Cancer46,Cancer47,Cancer48,Cancer49,Cancer50,
+                                Cancer51,Cancer52,Cancer53,Cancer54,Cancer55,
+                                Cancer56,Cancer57,Cancer58,Cancer59,Cancer60,
+                                Cancer65,Cancer67,Cancer70,
+                                Cancer71,Cancer72,Cancer73,Cancer74,Cancer75,
+                                Cancer76,Cancer77,Cancer78,Cancer79,Cancer80,
+                                Cancer81,Cancer82,Cancer83,Cancer84,Cancer85,
+                                Cancer86,Cancer87,Cancer88,Cancer89,Cancer90,
+                                Cancer91,Cancer92,Cancer93,Cancer94,Cancer95,
+                                Cancer96,Cancer97,Cancer98,Cancer99,Cancer100,
+                                Cancer101,Cancer102,Cancer103,Cancer104,Cancer105,
+                                Cancer106,Cancer107,Cancer108,Cancer109,Cancer110,
+                                Cancer111,Cancer112,Cancer113,Cancer114,Cancer115,
+                                Cancer116,Cancer117,Cancer118,Cancer119,Cancer120,
+                                Cancer121,Cancer122,Cancer123,Cancer124,Cancer125,
+                                Cancer126,Cancer127,Cancer128,Cancer129,Cancer130,
+                                Cancer131,Cancer132,Cancer133,Cancer134,Cancer135,
+                                Cancer136,Cancer137,Cancer138,Cancer139,Cancer140,
+                                Cancer141,Cancer142,Cancer143,Cancer144,Cancer145,
+                                Cancer146,Cancer147,Cancer148))
+
+
+Allsamples <- NormalizeData(Allsamples)
+
+Allsamples<- FindVariableFeatures(Allsamples,selection.method = "vst",nfeatures = 2000)
+
+Allsamples <- ScaleData(Allsamples,features = rownames(Allsamples))
+
+Allsamples <- RunPCA(Allsamples,features = VariableFeatures(object = Allsamples))
+
+Allsamples <- Allsamples %>% RunHarmony("samples", plot_convergence = TRUE)
+
+
+
+Allsamples <- FindNeighbors(Allsamples,dims = 1:15)
+Allsamples <- FindClusters(Allsamples,resolution = 1)
+Allsamples <- RunUMAP(Allsamples ,dims = 1:15)
+
+library(cowplot)
+p1 <- DimPlot(Allsamples,reduction = "umap",group.by = "samples")
+p2 <- DimPlot(Allsamples,reduction = "umap",group.by = "orig.ident")
+p3 <- DimPlot(Allsamples,reduction = "umap",group.by = "tissue")
+p4 <- DimPlot(Allsamples,reduction = "umap",label = TRUE,repel = TRUE)
+p1+p2
+p3
+DefaultAssay(Allsamples) <- "RNA"
+
+VlnPlot(Colon.Epi,features = c("CCL7","CCL13","CRYBA2","SCGN","PCSK1N","PTMS"))
+FeaturePlot(Allsamples,features = c("THY1"))
+DotPlot(Allsamples,features = c("EPCAM","PTPRC","THY1"))
+
+
+
+Colon.makers <- FindAllMarkers(Colon.Epi,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+
+
+
+DimPlot(Colon.Epi, reduction = "umap", label = TRUE, pt.size = 0.5,) + NoLegend()
+
+
+markers.to.plot <- c("MUC2","SPINK4","ITLN1","CD2","CD3D","CD3E","CD3G",
+                     "CD79A","CD19","MS4A1","HLA-DRA","HLA-DQB1","HLA-DPB1",
+                     "LGR5","ASCL2","TPSAB1","TPSB2","NNMT","IGFBP7","CALD1","MMP2",
+                     "LEFTY1","EPCAM","CEACAM7","AQP8","SLC26A3","CEACAM1",
+                     "CA1","KRT19")
+DotPlot(Colon.Epi,features = markers.to.plot,cols = c("blue","red"),dot.scale = 8)+RotatedAxis()
+
+
+
+
+
+
+
+
+
+VizDimLoadings(UC.integrated,dims = 1:2,reduction = "pca")
+DimPlot(health.integrated,reduction = "pca")
+DimHeatmap(health.integrated,dims = 1,cells = 500,balanced = TRUE)
+DimHeatmap(health.integrated,dims = 1:15,cells = 500,balanced = TRUE)
+
+Colon.integrated <- JackStraw(Colon.integrated,num.replicate = 100)
+Colon.integrated <- ScoreJackStraw(Colon.integrated,dims = 1:20)
+JackStrawPlot(Colon.integrated,dims = 1:15)
+ElbowPlot(Colon.integrated)
+
+
+
+
+Colon.integrated <- IntegrateData(anchorset = Colon.epi,dims = 1:20)
+
+DefaultAssay(Colon.integrated) <- "integrated"
+Colon.integrated <- ScaleData(Colon.integrated,features = rownames(Colon.integrated))
+Colon.integrated <- RunPCA(Colon.integrated,features = VariableFeatures(object = Colon.integrated))
+
+
+Colon.integrated <- FindNeighbors(Colon.integrated,dims = 1:14)
+Colon.integrated <- FindClusters(Colon.integrated,resolution = 0.8)
+Colon.integrated <- RunUMAP(Colon.integrated,dims = 1:14)
+Colon.integrated <- RunTSNE(Colon.integrated,dims = 1:14)
+
+library(cowplot)
+p1 <- DimPlot(Colon.integrated,reduction = "umap",group.by = "orig.ident")
+p2 <- DimPlot(Colon.integrated,reduction = "umap",label = TRUE,repel = TRUE)
+p1+p2
+
+p3 <- DimPlot(Colon.integrated,reduction = "umap",group.by = "orig.ident")
+p4 <- DimPlot(Colon.integrated,reduction = "tsne",label = TRUE,repel = TRUE)
+p3+p4
+
+
+
+DefaultAssay(Colon.integrated) <- "RNA"
+
+
+
+
+VlnPlot(Colon.integrated,features = c("BEST4","CA7","OTOP2","SPIB"))
+FeaturePlot(Colon.integrated,features = c("RBP2","SLC26A2","FABP1","CA1","EPCAM"))
+
+health.makers %>%group_by(cluster)%>%top_n(n=2,wt = avg_log2FC)
+top20 <- health.makers %>% group_by(cluster) %>% top_n(n=20,wt = avg_log2FC)
+DoHeatmap(health.integrated,features = top20$gene) + NoLegend()
+
+Colon.integrated <- RenameIdents(Colon.integrated, `0` = "TA Cells", `1` = "T Cells", `2` = "EECs", 
+                                 `3` = "Enterocytes", `4` = "Cycling TA", `5` = "Immature Enterocytes",
+                                 `6` = "Enterocytes Progrenitors", `7` = "Goblet Cells", `8` = "Cycling TA", `9` = "TA Cells", 
+                                 `10` = "Goblet Cells", `11` = "Immature Enterocytes", `12` = "Enterocytes", `13` = "Immature Enterocytes", 
+                                 `14` = "Tuft",`15` = "BEST+ Enterocytes", `16` = "ILCs", `17` = "TA Cells")
+
+
+Idents(health.integrated) <- factor(Idents(health.integrated),
+                                    levels = c("Transit Amplifyling Cell","CT Colonocytes","Absorptive Progenitors",
+                                               "Colonocytes","Goblet Cells","Cycling TA","Immature enterocytes",
+                                               "T Cells","Secretory Progenitors","BEST4/OTOP2"))
+
+markers.to.plot <- c("BEST4","CA7","OTOP2","SPIB","ZG16","MUC2","ITLN1","CD44","CCL5","CREM",
+                     "STMN1","PTTG1","BIRC5","UBE2C","CENPM","TK1",
+                     "LEFTY1","SLC26A3","RBP2","SLC26A2","FABP1","CA1","EPCAM",
+                     "SCGN","CRYBA2","CCL7","CCL13","HCK","TRPM5","HLA-DRA",
+                     "GUCA2A","CEACAM1","CEACAM7","AQP8")
+DotPlot(Colon.integrated,features = markers.to.plot,cols = c("blue","red"),dot.scale = 8)+RotatedAxis()
+
+
+
+Allsamples$orig.ident[which(is.na(Allsamples$samples))] <- "GSM3576397"
+
+
+
+
+doubletratio <- c()
+for (i in 1:length(combine)) {
+  doubletratio[i] <- (combine[[i]]@meta.data %>% nrow()) / 500 * 0.004
+}
+
+
+DelDoublet <- function(SeuratObject, DoubletRate){
+  sweep.res.list <- paramSweep_v3(SeuratObject, PCs = pc.num, sct = F)
+  sweep.stats <- summarizeSweep(sweep.res.list, GT = FALSE)  
+  bcmvn <- find.pK(sweep.stats)
+  pK_bcmvn <- bcmvn$pK[which.max(bcmvn$BCmetric)] %>% as.character() %>% as.numeric()
+  
+  ## 排除不能检出的同源doublets，优化期望的doublets数量
+  homotypic.prop <- modelHomotypic(SeuratObject$seurat_clusters)   # 最好提供celltype
+  nExp_poi <- round(DoubletRate*ncol(SeuratObject)) 
+  nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
+  SeuratObject <- doubletFinder_v3(SeuratObject, PCs = pc.num, pN = 0.25, pK = pK_bcmvn, 
+                                   nExp = nExp_poi.adj, reuse.pANN = F, sct = F)
+  return(SeuratObject)
+}
+pc.num <- 1:15
+
+
+
+
+UC1 <- DelDoublet(SeuratObject = UC1,DoubletRate = 0.028)
+UC2 <- DelDoublet(SeuratObject = UC2,DoubletRate = 0.010)
+UC3 <- DelDoublet(SeuratObject = UC3,DoubletRate = 0.023)
+UC4 <- DelDoublet(SeuratObject = UC4,DoubletRate = 0.004)
+UC5 <- DelDoublet(SeuratObject = UC5,DoubletRate = 0.003)
+UC6 <- DelDoublet(SeuratObject = UC6,DoubletRate = 0.021)
+UC7 <- DelDoublet(SeuratObject = UC7,DoubletRate = 0.020)
+UC8 <- DelDoublet(SeuratObject = UC8,DoubletRate = 0.025)
+UC9 <- DelDoublet(SeuratObject = UC9,DoubletRate = 0.023)
+UC10 <- DelDoublet(SeuratObject = UC10,DoubletRate = 0.019)
+
+UC11 <- DelDoublet(SeuratObject = UC11,DoubletRate = 0.025)
+UC12 <- DelDoublet(SeuratObject = UC12,DoubletRate = 0.020)
+UC13 <- DelDoublet(SeuratObject = UC13,DoubletRate = 0.032)
+UC14 <- DelDoublet(SeuratObject = UC14,DoubletRate = 0.051)
+UC15 <- DelDoublet(SeuratObject = UC15,DoubletRate = 0.040)
+UC16 <- DelDoublet(SeuratObject = UC16,DoubletRate = 0.010)
+UC17 <- DelDoublet(SeuratObject = UC17,DoubletRate = 0.010)
+UC18 <- DelDoublet(SeuratObject = UC18,DoubletRate = 0.013)
+UC19 <- DelDoublet(SeuratObject = UC19,DoubletRate = 0.009)
+UC20 <- DelDoublet(SeuratObject = UC20,DoubletRate = 0.007)
+
+UC21 <- DelDoublet(SeuratObject = UC21,DoubletRate = 0.010)
+UC22 <- DelDoublet(SeuratObject = UC22,DoubletRate = 0.017)
+UC23 <- DelDoublet(SeuratObject = UC23,DoubletRate = 0.018)
+UC24 <- DelDoublet(SeuratObject = UC24,DoubletRate = 0.015)
+UC25 <- DelDoublet(SeuratObject = UC25,DoubletRate = 0.010)
+UC26 <- DelDoublet(SeuratObject = UC26,DoubletRate = 0.008)
+UC27 <- DelDoublet(SeuratObject = UC27,DoubletRate = 0.012)
+UC28 <- DelDoublet(SeuratObject = UC28,DoubletRate = 0.005)
+UC29 <- DelDoublet(SeuratObject = UC29,DoubletRate = 0.008)
+UC30 <- DelDoublet(SeuratObject = UC30,DoubletRate = 0.036)
+
+UC31 <- DelDoublet(SeuratObject = UC31,DoubletRate = 0.008)
+UC32 <- DelDoublet(SeuratObject = UC32,DoubletRate = 0.004)
+UC33 <- DelDoublet(SeuratObject = UC33,DoubletRate = 0.031)
+UC34 <- DelDoublet(SeuratObject = UC34,DoubletRate = 0.011)
+UC35 <- DelDoublet(SeuratObject = UC35,DoubletRate = 0.028)
+UC36 <- DelDoublet(SeuratObject = UC36,DoubletRate = 0.036)
+UC37 <- DelDoublet(SeuratObject = UC37,DoubletRate = 0.022)
+UC38 <- DelDoublet(SeuratObject = UC38,DoubletRate = 0.015)
+UC39 <- DelDoublet(SeuratObject = UC39,DoubletRate = 0.095)
+UC40 <- DelDoublet(SeuratObject = UC40,DoubletRate = 0.129)
+
+UC41 <- DelDoublet(SeuratObject = UC41,DoubletRate = 0.110)
+UC42 <- DelDoublet(SeuratObject = UC42,DoubletRate = 0.138)
+UC43 <- DelDoublet(SeuratObject = UC43,DoubletRate = 0.014)
+UC44 <- DelDoublet(SeuratObject = UC44,DoubletRate = 0.030)
+UC45 <- DelDoublet(SeuratObject = UC45,DoubletRate = 0.015)
+
+
+
+UC1 <- subset(UC1, subset=DF.classifications_0.25_0.08_87=='Singlet')
+UC2 <- subset(UC2, subset=DF.classifications_0.25_0.29_10=='Singlet')
+UC3 <- subset(UC3, subset=DF.classifications_0.25_0.01_55=='Singlet')
+UC4 <- subset(UC4, subset=DF.classifications_0.25_0.02_1=='Singlet')
+UC5 <- subset(UC5, subset=DF.classifications_0.25_0.28_1=='Singlet')
+
+UC6 <- subset(UC6, subset=DF.classifications_0.25_0.16_47=='Singlet')
+UC7 <- subset(UC7, subset=DF.classifications_0.25_0.02_38=='Singlet')
+UC8 <- subset(UC8, subset=DF.classifications_0.25_0.21_65=='Singlet')
+UC9 <- subset(UC9, subset=DF.classifications_0.25_0.01_55=='Singlet')
+UC10 <- subset(UC10, subset=DF.classifications_0.25_0.02_37=='Singlet')
+
+UC11 <- subset(UC11, subset=DF.classifications_0.25_0.01_64=='Singlet')
+UC12 <- subset(UC12, subset=DF.classifications_0.25_0.02_40=='Singlet')
+UC13 <- subset(UC13, subset=DF.classifications_0.25_0.005_113=='Singlet')
+UC14 <- subset(UC14, subset=DF.classifications_0.25_0.005_290=='Singlet')
+UC15 <- subset(UC15, subset=DF.classifications_0.25_0.13_174=='Singlet')
+
+UC16 <- subset(UC16, subset=DF.classifications_0.25_0.3_10=='Singlet')
+UC17 <- subset(UC17, subset=DF.classifications_0.25_0.02_10=='Singlet')
+UC18 <- subset(UC18, subset=DF.classifications_0.25_0.03_17=='Singlet')
+UC19 <- subset(UC19, subset=DF.classifications_0.25_0.03_9=='Singlet')
+UC20 <- subset(UC20, subset=DF.classifications_0.25_0.04_5=='Singlet')
+
+UC21 <- subset(UC21, subset=DF.classifications_0.25_0.04_10=='Singlet')
+UC22 <- subset(UC22, subset=DF.classifications_0.25_0.03_30=='Singlet')
+UC23 <- subset(UC23, subset=DF.classifications_0.25_0.02_33=='Singlet')
+UC24 <- subset(UC24, subset=DF.classifications_0.25_0.19_22=='Singlet')
+UC25 <- subset(UC25, subset=DF.classifications_0.25_0.03_10=='Singlet')
+
+UC26 <- subset(UC26, subset=DF.classifications_0.25_0.02_6=='Singlet')
+UC27 <- subset(UC27, subset=DF.classifications_0.25_0.03_14=='Singlet')
+UC28 <- subset(UC28, subset=DF.classifications_0.25_0.19_2=='Singlet')
+UC29 <- subset(UC29, subset=DF.classifications_0.25_0.12_6=='Singlet')
+UC30 <- subset(UC30, subset=DF.classifications_0.25_0.24_142=='Singlet')
+
+UC31 <- subset(UC31, subset=DF.classifications_0.25_0.06_6=='Singlet')
+UC32 <- subset(UC32, subset=DF.classifications_0.25_0.03_2=='Singlet')
+UC33 <- subset(UC33, subset=DF.classifications_0.25_0.13_105=='Singlet')
+UC34 <- subset(UC34, subset=DF.classifications_0.25_0.03_10=='Singlet')
+UC35 <- subset(UC35, subset=DF.classifications_0.25_0.27_79=='Singlet')
+
+UC36 <- subset(UC36, subset=DF.classifications_0.25_0.24_133=='Singlet')
+UC37 <- subset(UC37, subset=DF.classifications_0.25_0.02_51=='Singlet')
+UC38 <- subset(UC38, subset=DF.classifications_0.25_0.02_23=='Singlet')
+UC39 <- subset(UC39, subset=DF.classifications_0.25_0.005_963=='Singlet')
+UC40 <- subset(UC40, subset=DF.classifications_0.25_0.005_1823=='Singlet')
+
+UC41 <- subset(UC41, subset=DF.classifications_0.25_0.04_1299=='Singlet')
+UC42 <- subset(UC42, subset=DF.classifications_0.25_0.005_2097=='Singlet')
+UC43 <- subset(UC43, subset=DF.classifications_0.25_0.2_21=='Singlet')
+UC44 <- subset(UC44, subset=DF.classifications_0.25_0.01_96=='Singlet')
+UC45 <- subset(UC45, subset=DF.classifications_0.25_0.3_23=='Singlet')
+
+
+
+
+
+
+Healthy1 <- FindNeighbors(Healthy1,dims = 1:15)
+Healthy2 <- FindNeighbors(Healthy2,dims = 1:15)
+Healthy3 <- FindNeighbors(Healthy3,dims = 1:15)
+Healthy4 <- FindNeighbors(Healthy4,dims = 1:15)
+Healthy5 <- FindNeighbors(Healthy5,dims = 1:15)
+Healthy6 <- FindNeighbors(Healthy6,dims = 1:15)
+Healthy7 <- FindNeighbors(Healthy7,dims = 1:15)
+Healthy8 <- FindNeighbors(Healthy8,dims = 1:15)
+Healthy9 <- FindNeighbors(Healthy9,dims = 1:15)
+Healthy10 <- FindNeighbors(Healthy10,dims = 1:15)
+Healthy11 <- FindNeighbors(Healthy11,dims = 1:15)
+Healthy12 <- FindNeighbors(Healthy12,dims = 1:15)
+Healthy13 <- FindNeighbors(Healthy13,dims = 1:15)
+Healthy14 <- FindNeighbors(Healthy14,dims = 1:15)
+Healthy15 <- FindNeighbors(Healthy15,dims = 1:15)
+Healthy16 <- FindNeighbors(Healthy16,dims = 1:15)
+Healthy17 <- FindNeighbors(Healthy17,dims = 1:15)
+Healthy18 <- FindNeighbors(Healthy18,dims = 1:15)
+Healthy19 <- FindNeighbors(Healthy19,dims = 1:15)
+Healthy20 <- FindNeighbors(Healthy20,dims = 1:15)
+Healthy21 <- FindNeighbors(Healthy21,dims = 1:15)
+Healthy22 <- FindNeighbors(Healthy22,dims = 1:15)
+Healthy23 <- FindNeighbors(Healthy23,dims = 1:15)
+Healthy24 <- FindNeighbors(Healthy24,dims = 1:15)
+Healthy25 <- FindNeighbors(Healthy25,dims = 1:15)
+Healthy26 <- FindNeighbors(Healthy26,dims = 1:15)
+Healthy27 <- FindNeighbors(Healthy27,dims = 1:15)
+Healthy28 <- FindNeighbors(Healthy28,dims = 1:15)
+Healthy29 <- FindNeighbors(Healthy29,dims = 1:15)
+Healthy30 <- FindNeighbors(Healthy30,dims = 1:15)
+Healthy31 <- FindNeighbors(Healthy31,dims = 1:15)
+Healthy32 <- FindNeighbors(Healthy32,dims = 1:15)
+Healthy33 <- FindNeighbors(Healthy33,dims = 1:15)
+Healthy34 <- FindNeighbors(Healthy34,dims = 1:15)
+Healthy35 <- FindNeighbors(Healthy35,dims = 1:15)
+Healthy36 <- FindNeighbors(Healthy36,dims = 1:15)
+Healthy37 <- FindNeighbors(Healthy37,dims = 1:15)
+Healthy38 <- FindNeighbors(Healthy38,dims = 1:15)
+Healthy39 <- FindNeighbors(Healthy39,dims = 1:15)
+Healthy40 <- FindNeighbors(Healthy40,dims = 1:15)
+Healthy41 <- FindNeighbors(Healthy41,dims = 1:15)
+
+Healthy1 <- FindClusters(Healthy1,resolution = 0.5)
+Healthy2 <- FindClusters(Healthy2,resolution = 0.5)
+Healthy3 <- FindClusters(Healthy3,resolution = 0.5)
+Healthy4 <- FindClusters(Healthy4,resolution = 0.5)
+Healthy5 <- FindClusters(Healthy5,resolution = 0.5)
+Healthy6 <- FindClusters(Healthy6,resolution = 0.5)
+Healthy7 <- FindClusters(Healthy7,resolution = 0.5)
+Healthy8 <- FindClusters(Healthy8,resolution = 0.5)
+Healthy9 <- FindClusters(Healthy9,resolution = 0.5)
+Healthy10 <- FindClusters(Healthy10,resolution = 0.5)
+Healthy11 <- FindClusters(Healthy11,resolution = 0.5)
+Healthy12 <- FindClusters(Healthy12,resolution = 0.5)
+Healthy13 <- FindClusters(Healthy13,resolution = 0.5)
+Healthy14 <- FindClusters(Healthy14,resolution = 0.5)
+Healthy15 <- FindClusters(Healthy15,resolution = 0.5)
+Healthy16 <- FindClusters(Healthy16,resolution = 0.5)
+Healthy17 <- FindClusters(Healthy17,resolution = 0.5)
+Healthy18 <- FindClusters(Healthy18,resolution = 0.5)
+Healthy19 <- FindClusters(Healthy19,resolution = 0.5)
+Healthy20 <- FindClusters(Healthy20,resolution = 0.5)
+Healthy21 <- FindClusters(Healthy21,resolution = 0.5)
+Healthy22 <- FindClusters(Healthy22,resolution = 0.5)
+Healthy23 <- FindClusters(Healthy23,resolution = 0.5)
+Healthy24 <- FindClusters(Healthy24,resolution = 0.5)
+Healthy25 <- FindClusters(Healthy25,resolution = 0.5)
+Healthy26 <- FindClusters(Healthy26,resolution = 0.5)
+Healthy27 <- FindClusters(Healthy27,resolution = 0.5)
+Healthy28 <- FindClusters(Healthy28,resolution = 0.5)
+Healthy29 <- FindClusters(Healthy29,resolution = 0.5)
+Healthy30 <- FindClusters(Healthy30,resolution = 0.5)
+Healthy31 <- FindClusters(Healthy31,resolution = 0.5)
+Healthy32 <- FindClusters(Healthy32,resolution = 0.5)
+Healthy33 <- FindClusters(Healthy33,resolution = 0.5)
+Healthy34 <- FindClusters(Healthy34,resolution = 0.5)
+Healthy35 <- FindClusters(Healthy35,resolution = 0.5)
+Healthy36 <- FindClusters(Healthy36,resolution = 0.5)
+Healthy37 <- FindClusters(Healthy37,resolution = 0.5)
+Healthy38 <- FindClusters(Healthy38,resolution = 0.5)
+Healthy39 <- FindClusters(Healthy39,resolution = 0.5)
+Healthy40 <- FindClusters(Healthy40,resolution = 0.5)
+Healthy41 <- FindClusters(Healthy41,resolution = 0.5)
+
+Healthy1 <- RunUMAP(Healthy1,dims = 1:15)
+Healthy2 <- RunUMAP(Healthy2,dims = 1:15)
+Healthy3 <- RunUMAP(Healthy3,dims = 1:15)
+Healthy4 <- RunUMAP(Healthy4,dims = 1:15)
+Healthy5 <- RunUMAP(Healthy5,dims = 1:15)
+Healthy6 <- RunUMAP(Healthy6,dims = 1:15)
+Healthy7 <- RunUMAP(Healthy7,dims = 1:15)
+Healthy8 <- RunUMAP(Healthy8,dims = 1:15)
+Healthy9 <- RunUMAP(Healthy9,dims = 1:15)
+Healthy10 <- RunUMAP(Healthy10,dims = 1:15)
+Healthy11 <- RunUMAP(Healthy11,dims = 1:15)
+Healthy12 <- RunUMAP(Healthy12,dims = 1:15)
+Healthy13 <- RunUMAP(Healthy13,dims = 1:15)
+Healthy14 <- RunUMAP(Healthy14,dims = 1:15)
+Healthy15 <- RunUMAP(Healthy15,dims = 1:15)
+Healthy16 <- RunUMAP(Healthy16,dims = 1:15)
+Healthy17 <- RunUMAP(Healthy17,dims = 1:15)
+Healthy18 <- RunUMAP(Healthy18,dims = 1:15)
+Healthy19 <- RunUMAP(Healthy19,dims = 1:15)
+Healthy20 <- RunUMAP(Healthy20,dims = 1:15)
+Healthy21 <- RunUMAP(Healthy21,dims = 1:15)
+Healthy22 <- RunUMAP(Healthy22,dims = 1:15)
+Healthy23 <- RunUMAP(Healthy23,dims = 1:15)
+Healthy24 <- RunUMAP(Healthy24,dims = 1:15)
+Healthy25 <- RunUMAP(Healthy25,dims = 1:15)
+Healthy26 <- RunUMAP(Healthy26,dims = 1:15)
+Healthy27 <- RunUMAP(Healthy27,dims = 1:15)
+Healthy28 <- RunUMAP(Healthy28,dims = 1:15)
+Healthy29 <- RunUMAP(Healthy29,dims = 1:15)
+Healthy30 <- RunUMAP(Healthy30,dims = 1:15)
+Healthy31 <- RunUMAP(Healthy31,dims = 1:15)
+Healthy32 <- RunUMAP(Healthy32,dims = 1:15)
+Healthy33 <- RunUMAP(Healthy33,dims = 1:15)
+Healthy34 <- RunUMAP(Healthy34,dims = 1:15)
+Healthy35 <- RunUMAP(Healthy35,dims = 1:15)
+Healthy36 <- RunUMAP(Healthy36,dims = 1:15)
+Healthy37 <- RunUMAP(Healthy37,dims = 1:15)
+Healthy38 <- RunUMAP(Healthy38,dims = 1:15)
+Healthy39 <- RunUMAP(Healthy39,dims = 1:15)
+Healthy40 <- RunUMAP(Healthy40,dims = 1:15)
+Healthy41 <- RunUMAP(Healthy41,dims = 1:15)
+
+
+
+Healthy1 <- DelDoublet(SeuratObject = Healthy1,DoubletRate = 0.050368)
+Healthy2 <- DelDoublet(SeuratObject = Healthy2,DoubletRate = 0.020936)
+Healthy3 <- DelDoublet(SeuratObject = Healthy3,DoubletRate = 0.025536)
+Healthy4 <- DelDoublet(SeuratObject = Healthy4,DoubletRate = 0.014256)
+Healthy5 <- DelDoublet(SeuratObject = Healthy5,DoubletRate = 0.019544)
+Healthy6 <- DelDoublet(SeuratObject = Healthy6,DoubletRate = 0.008656)
+Healthy7 <- DelDoublet(SeuratObject = Healthy7,DoubletRate = 0.030424)
+Healthy8 <- DelDoublet(SeuratObject = Healthy8,DoubletRate = 0.009568)
+Healthy9 <- DelDoublet(SeuratObject = Healthy9,DoubletRate = 0.001840)
+Healthy10 <- DelDoublet(SeuratObject = Healthy10,DoubletRate = 0.017520)
+
+Healthy11 <- DelDoublet(SeuratObject = Healthy11,DoubletRate = 0.004672)
+Healthy12 <- DelDoublet(SeuratObject = Healthy12,DoubletRate = 0.012632)
+Healthy13 <- DelDoublet(SeuratObject = Healthy13,DoubletRate = 0.004920)
+Healthy14 <- DelDoublet(SeuratObject = Healthy14,DoubletRate = 0.011352)
+Healthy15 <- DelDoublet(SeuratObject = Healthy15,DoubletRate = 0.015096)
+Healthy16 <- DelDoublet(SeuratObject = Healthy16,DoubletRate = 0.015064)
+Healthy17 <- DelDoublet(SeuratObject = Healthy17,DoubletRate = 0.015072)
+Healthy18 <- DelDoublet(SeuratObject = Healthy18,DoubletRate = 0.002416)
+Healthy19 <- DelDoublet(SeuratObject = Healthy19,DoubletRate = 0.011688)
+Healthy20 <- DelDoublet(SeuratObject = Healthy20,DoubletRate = 0.114192)
+
+Healthy21 <- DelDoublet(SeuratObject = Healthy21,DoubletRate = 0.031392)
+Healthy22 <- DelDoublet(SeuratObject = Healthy22,DoubletRate = 0.002456)
+Healthy23 <- DelDoublet(SeuratObject = Healthy23,DoubletRate = 0.015152)
+Healthy24 <- DelDoublet(SeuratObject = Healthy24,DoubletRate = 0.019240)
+Healthy25 <- DelDoublet(SeuratObject = Healthy25,DoubletRate = 0.008128)
+Healthy26 <- DelDoublet(SeuratObject = Healthy26,DoubletRate = 0.007864)
+Healthy27 <- DelDoublet(SeuratObject = Healthy27,DoubletRate = 0.020640)
+Healthy28 <- DelDoublet(SeuratObject = Healthy28,DoubletRate = 0.017448)
+Healthy29 <- DelDoublet(SeuratObject = Healthy29,DoubletRate = 0.016592)
+Healthy30 <- DelDoublet(SeuratObject = Healthy30,DoubletRate = 0.006072)
+
+Healthy31 <- DelDoublet(SeuratObject = Healthy31,DoubletRate = 0.062552)
+Healthy32 <- DelDoublet(SeuratObject = Healthy32,DoubletRate = 0.010112)
+Healthy33 <- DelDoublet(SeuratObject = Healthy33,DoubletRate = 0.023504)
+Healthy34 <- DelDoublet(SeuratObject = Healthy34,DoubletRate = 0.030624)
+Healthy35 <- DelDoublet(SeuratObject = Healthy35,DoubletRate = 0.015640)
+Healthy36 <- DelDoublet(SeuratObject = Healthy36,DoubletRate = 0.024656)
+Healthy37 <- DelDoublet(SeuratObject = Healthy37,DoubletRate = 0.029640)
+Healthy38 <- DelDoublet(SeuratObject = Healthy38,DoubletRate = 0.049936)
+Healthy39 <- DelDoublet(SeuratObject = Healthy39,DoubletRate = 0.019080)
+Healthy40 <- DelDoublet(SeuratObject = Healthy40,DoubletRate = 0.087584)
+Healthy41 <- DelDoublet(SeuratObject = Healthy41,DoubletRate = 0.047352)
+
+
+
+Healthy1 <- subset(Healthy1, subset=DF.classifications_0.25_0.16_273=='Singlet')
+Healthy2 <- subset(Healthy2, subset=DF.classifications_0.25_0.04_49=='Singlet')
+Healthy3 <- subset(Healthy3, subset=DF.classifications_0.25_0.16_71=='Singlet')
+Healthy4 <- subset(Healthy4, subset=DF.classifications_0.25_0.3_21=='Singlet')
+Healthy5 <- subset(Healthy5, subset=DF.classifications_0.25_0.01_42=='Singlet')
+
+Healthy6 <- subset(Healthy6, subset=DF.classifications_0.25_0.05_7=='Singlet')
+Healthy7 <- subset(Healthy7, subset=DF.classifications_0.25_0.15_98=='Singlet')
+Healthy8 <- subset(Healthy8, subset=DF.classifications_0.25_0.02_9=='Singlet')
+Healthy9 <- subset(Healthy9, subset=DF.classifications_0.25_0.23_0=='Singlet')
+Healthy10 <- subset(Healthy10, subset=DF.classifications_0.25_0.08_32=='Singlet')
+
+Healthy11 <- subset(Healthy11, subset=DF.classifications_0.25_0.2_2=='Singlet')
+Healthy12 <- subset(Healthy12, subset=DF.classifications_0.25_0.26_18=='Singlet')
+Healthy13 <- subset(Healthy13, subset=DF.classifications_0.25_0.04_2=='Singlet')
+Healthy14 <- subset(Healthy14, subset=DF.classifications_0.25_0.3_14=='Singlet')
+Healthy15 <- subset(Healthy15, subset=DF.classifications_0.25_0.29_24=='Singlet')
+
+Healthy16 <- subset(Healthy16, subset=DF.classifications_0.25_0.05_25=='Singlet')
+Healthy17 <- subset(Healthy17, subset=DF.classifications_0.25_0.11_23=='Singlet')
+Healthy18 <- subset(Healthy18, subset=DF.classifications_0.25_0.04_1=='Singlet')
+Healthy19 <- subset(Healthy19, subset=DF.classifications_0.25_0.26_15=='Singlet')
+Healthy20 <- subset(Healthy20, subset=DF.classifications_0.25_0.005_1180=='Singlet')
+
+Healthy21 <- subset(Healthy21, subset=DF.classifications_0.25_0.13_115=='Singlet')
+Healthy22 <- subset(Healthy22, subset=DF.classifications_0.25_0.08_1=='Singlet')
+Healthy23 <- subset(Healthy23, subset=DF.classifications_0.25_0.02_23=='Singlet')
+Healthy24 <- subset(Healthy24, subset=DF.classifications_0.25_0.01_36=='Singlet')
+Healthy25 <- subset(Healthy25, subset=DF.classifications_0.25_0.08_6=='Singlet')
+
+Healthy26 <- subset(Healthy26, subset=DF.classifications_0.25_0.02_6=='Singlet')
+Healthy27 <- subset(Healthy27, subset=DF.classifications_0.25_0.02_38=='Singlet')
+Healthy28 <- subset(Healthy28, subset=DF.classifications_0.25_0.01_29=='Singlet')
+Healthy29 <- subset(Healthy29, subset=DF.classifications_0.25_0.005_26=='Singlet')
+Healthy30 <- subset(Healthy30, subset=DF.classifications_0.25_0.21_4=='Singlet')
+
+Healthy31 <- subset(Healthy31, subset=DF.classifications_0.25_0.3_400=='Singlet')
+Healthy32 <- subset(Healthy32, subset=DF.classifications_0.25_0.3_10=='Singlet')
+Healthy33 <- subset(Healthy33, subset=DF.classifications_0.25_0.28_57=='Singlet')
+Healthy34 <- subset(Healthy34, subset=DF.classifications_0.25_0.14_94=='Singlet')
+Healthy35 <- subset(Healthy35, subset=DF.classifications_0.25_0.23_26=='Singlet')
+
+Healthy36 <- subset(Healthy36, subset=DF.classifications_0.25_0.17_62=='Singlet')
+Healthy37 <- subset(Healthy37, subset=DF.classifications_0.25_0.24_88=='Singlet')
+Healthy38 <- subset(Healthy38, subset=DF.classifications_0.25_0.005_257=='Singlet')
+Healthy39 <- subset(Healthy39, subset=DF.classifications_0.25_0.15_37=='Singlet')
+Healthy40 <- subset(Healthy40, subset=DF.classifications_0.25_0.005_816=='Singlet')
+Healthy41 <- subset(Healthy41, subset=DF.classifications_0.25_0.005_241=='Singlet')
+
+
+
+Allsamples <- merge(UC42,y=c(Cancer1,Cancer2,Cancer3,Cancer4,Cancer5,
+                             Cancer6,Cancer7,Cancer8,Cancer9,Cancer10,
+                             Cancer11,Cancer12,Cancer13,Cancer14,
+                             Healthy1,Healthy2,Healthy3,Healthy4,Healthy5,
+                             Healthy6,Healthy7,Healthy8,Healthy9,Healthy10,
+                             Healthy11,Healthy12,Healthy13,Healthy14,Healthy15,
+                             Healthy16,Healthy17,Healthy18,Healthy19,Healthy20,
+                             Healthy21,Healthy22,Healthy23,Healthy24,Healthy25,
+                             Healthy26,Healthy27,Healthy28,Healthy29,Healthy30,
+                             Healthy31,Healthy32,Healthy33,Healthy34,Healthy35,
+                             Healthy36,Healthy37,Healthy38,Healthy39,Healthy40,
+                             Healthy41,
+                             UC1,UC2,UC3,UC4,UC5,UC6,UC7,UC8,UC9,UC10,
+                             UC11,UC12,UC13,UC14,UC15,UC16,UC17,UC18,UC19,UC20,
+                             UC21,UC22,UC23,UC24,UC25,UC26,UC27,UC28,UC29,UC30,
+                             UC31,UC32,UC33,UC34,UC35,UC36,UC37,UC38,UC39,UC40,
+                             UC41,UC43,UC44,UC45))
+
+Allsamples <- NormalizeData(Allsamples)
+
+Allsamples<- FindVariableFeatures(Allsamples,selection.method = "vst",nfeatures = 2000)
+
+Allsamples <- ScaleData(Allsamples,features = rownames(Allsamples))
+
+Allsamples <- RunPCA(Allsamples,features = VariableFeatures(object = Allsamples))
+
+Allsamples <- Allsamples %>% RunHarmony("samples", plot_convergence = TRUE)
+
+Allsamples <- FindNeighbors(Allsamples,dims = 1:15,reduction = "harmony")
+Allsamples <- FindClusters(Allsamples,resolution = 0.5)
+Allsamples <- RunUMAP(Allsamples ,dims = 1:15,reduction = "harmony")
+
+
+
+DimPlot(Allsamples,reduction = "umap",group.by = "samples")
+DimPlot(Allsamples,reduction = "umap",group.by = "status")
+DimPlot(Allsamples,reduction = "umap",group.by = "tissue")
+DimPlot(AllCancer,reduction = "umap",label = TRUE,repel = TRUE)
+
+
+DotPlot(AllCancer,features = c("COL1A1","EPCAM","PECAM1",
+                                "PTPRC","STMN1","MS4A1",
+                                "CD3D","LYZ","TPSAB1","TNFRSF17"))
+
+
+
+
+
+
+
+
+
+Allsamples <- RenameIdents(Allsamples, `0` = "Immune Cells", `1` = "Immune Cells", `2` = "Immune Cells", 
+                           `3` = "Epithelial Cells", `4` = "Immune Cells", `5` = "Immune Cells",
+                           `6` = "Epithelial Cells", `7` = "Immune Cells", `8` = "Fibroblast Cells", `9` = "Immune Cells", 
+                           `10` = "Immune Cells", `11` = "Epithelial Cells", `12` = "Epithelial Cells", `13` = "Immune Cells", 
+                           `14` = "Epithelial Cells",`15` = "Endothelial Cells", `16` = "Immune Cells", `17` = "Epithelial Cells",
+                           `18` = "Immune Cells", `19` = "Immune Cells")
+
+
+Allsamples[['cell_type']] <- Allsamples@active.ident
+DimPlot(Allsamples,reduction = "umap",label = TRUE,repel = TRUE)
+
+
+Allsamples@active.ident <- Allsamples$RNA_snn_res.1
+
+Immune <- subset(Allsamples, subset=cell_type=='Immune Cells')
+saveRDS(Immune,file = "Immune")
+
