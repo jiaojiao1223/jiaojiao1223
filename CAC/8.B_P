@@ -1,0 +1,80 @@
+B_P <- readRDS("/home/majiao/Immune/B_P")
+
+library(harmony)
+library(Seurat)
+B_P <- NormalizeData(B_P)
+B_P <- FindVariableFeatures(B_P,selection.method = "vst",nfeatures = 2000)
+B_P <- ScaleData(B_P,features = rownames(B_P))
+B_P <- RunPCA(B_P,features = VariableFeatures(object = B_P))
+B_P <- B_P %>% RunHarmony("samples", plot_convergence = TRUE)
+B_P <- FindNeighbors(B_P,reduction = "harmony",dims = 1:15)
+B_P <- FindClusters(B_P,resolution = 0.8)
+B_P <- RunUMAP(B_P,reduction = "harmony",dims = 1:15)
+DefaultAssay(B_P) <- "RNA"
+
+BP_AllMarkers <- FindAllMarkers(B_P,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+
+
+
+cluster2 <- FindMarkers(B_P,ident.1 = 2,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+
+DotPlot(B_P,features = c("MS4A1","TNFRSF17"))
+DotPlot(B_P,features = c("MS4A1","TNFRSF17","IGHA1","IGHA2","IGHG1"))
+FeaturePlot(B_P,features = c("MS4A1","CD19","TNFRSF17"))
+
+
+DimPlot(B_P,reduction = "umap",label = TRUE,repel = TRUE)
+DimPlot(B_P,reduction = "umap",group.by = "status")
+
+B_P <- RenameIdents(B_P, `0` = "IGHA1_IGHA2_Plasma", `1` = "IGHA1_IGHA2_Plasma", `2` = "CD74_B", 
+                           `3` = "IGHA1_IGHA2_Plasma", `4` = "CD74_CD83_B", `5` = "IGHA1_IGHA2_Plasma",
+                           `6` = "IGHA1_IGHA2_Plasma", `7` = "CD74_B", `8` = "IGHA1_IGHA2_Plasma", 
+                           `9` = "IGHA1_IGHA2_Plasma", `10` = "IGHA1_IGHA2_Plasma", `11` = "IGHG1_Plasma", 
+                           `12` = "CD74_CD40_B", `13` = "IGHA1_IGHA2_Plasma", `14` = "IGHA1_IGHA2_Plasma",
+                           `15` = "IGHG1_Plasma", `16` = "CD74_CD83_RACK1_B", `17` = "IGHA1_IGHA2_Plasma",
+                           `18` = "IGHA1_IGHA2_Plasma",`19` = "CD74_RACK1_B", `20` = "IGHA1_IGHA2_Plasma", 
+                           `21` = "IGHG1_Plasma",`22` = "IGHA1_IGHA2_Plasma")
+
+B_P <- RenameIdents(B_P, `CXCR4_RACK1_B` = "Breg", `CXCR4_CD83_B` = "Breg")
+
+
+
+B_P[['BP_type']] <- B_P@active.ident
+
+B_P@active.ident <- B_P$RNA_snn_res.0.8
+
+gene <- c("CD19","CD79A","MS4A1","TNFRSF17",
+          "IGHA1","IGHA2","IGHG1",
+          "CD74","CD83","CD40","RACK1")
+
+
+DotPlot(B_P,features = gene)
+
+
+
+
+
+
+
+umap <- B_P@reductions$umap@cell.embeddings %>%
+  as.data.frame() %>%
+  cbind(cell_type = B_P@meta.data$BP_type)
+
+umap$barcodes <- rownames(umap)
+umap <- umap[,c(4,3)]
+
+
+
+
+lgA <- FindMarkers(B_P,ident.1 = "IGHA1_IGHA2_Plasma",only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+
+lgA <- arrange(lgA,-avg_log2FC)
+write.table(lgA,file = "lgA.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+
+
+
+BP_celltype <- subset(B_P@meta.data,select = c("BP_type"))
+
+write.table(BP_celltype,file = "BP_celltype.txt",sep = "\t",quote = FALSE,row.names = TRUE)
