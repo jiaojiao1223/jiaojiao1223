@@ -1,14 +1,4 @@
-library(tidyverse)
-library(Seurat)
-library(DoubletFinder)
-library(tidyverse)
-library(harmony)
-library(stringr)
-library(patchwork)
-library(SeuratDisk)
-library(ggrepel)
-library(monocle3, lib.loc = "/home/majiao/ENTER/envs/monocle3/lib/R/library")
-library(ggpubr, lib.loc = "/home/majiao/ENTER/envs/ggpubr2/lib/R/library")
+
 
 if (FALSE) {
   data_dir <- 'path/to/data/directory'
