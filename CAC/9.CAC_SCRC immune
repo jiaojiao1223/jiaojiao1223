@@ -1,0 +1,454 @@
+Immune <- readRDS("/home/majiao/CAC_sCRC/immune")
+
+library(Seurat)
+library(harmony)
+Immune <- NormalizeData(Immune)
+Immune <- FindVariableFeatures(Immune,selection.method = "vst",nfeatures = 2000)
+Immune <- ScaleData(Immune,features = rownames(Immune))
+Immune <- RunPCA(Immune,features = VariableFeatures(object = Immune))
+Immune <- Immune %>% RunHarmony("samples", plot_convergence = TRUE)
+Immune <- FindNeighbors(Immune,reduction = "harmony",dims = 1:15)
+Immune <- FindClusters(Immune,resolution = 0.5)
+Immune <- RunUMAP(Immune,reduction = "harmony",dims = 1:15)
+
+DefaultAssay(Immune) <- "RNA"
+
+
+
+Immune <- FindAllMarkers(Immune,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+DimPlot(Immune,reduction = "umap",group.by = "orig.ident")
+DimPlot(Immune,reduction = "umap",label = TRUE,repel = TRUE)
+
+
+
+DefaultAssay(Immune) <- "RNA"
+
+VlnPlot(Immune,features = c("CD19"))
+FeaturePlot(Immune,features = c("CD19","MS4A1"))
+FeaturePlot(Immune,features = c("CD3D","CD3E"))
+FeaturePlot(Immune,features = c("CD68","CD14"))
+FeaturePlot(Immune,features = c("TNFRSF17"))
+FeaturePlot(Immune,features = c("MS4A2","TPSAB1"))
+FeaturePlot(Immune,features = c("CD19","MS4A1","CD3D","CD3E","CD68","CD14","TNFRSF17","MS4A2","TPSAB1","KLRD1","KLRF1"))
+
+DotPlot(Immune,features = c("CD19","MS4A1",
+                            "CD3D","CD3E",
+                            "FGFBP2",
+                            "LYZ","CD68",
+                            "TNFRSF17","SDC1",
+                            "TPSAB1","CPA3"))
+
+
+DimPlot(Myeloid,reduction = "umap",label = TRUE,repel = TRUE,group.by = "seurat_clusters")
+FeaturePlot(Immune,features = c("TPSAB1","CPA3"))
+
+Immune <- RenameIdents(Immune, `0` = "T_NK Cells", `1` = "T_NK Cells", `2` = "T_NK Cells", 
+                       `3` = "B Cells", `4` = "Plasma Cells", `5` = "Myeloid Cells",
+                       `6` = "Myeloid Cells", `7` = "T_NK Cells", `8` = "Mast Cells", `9` = "Myeloid Cells", 
+                       `10` = "T_NK Cells", `11` = "T_NK Cells", `12` = "T_NK Cells", `13` = "T_NK Cells", 
+                       `14` = "Myeloid Cells",`15` = "T_NK Cells", `16` = "B Cells",
+                       `17` = "Plasma Cells", `18` = "B Cells", `19` = "Plasma Cells", `20` = "B Cells", 
+                       `21` = "Plasma Cells",`22` = "Plasma Cells", `23` = "B Cells", `24` = "Plasma Cells")
+
+
+markers.to.plot <- c("CD19","MS4A1","CD3D","CD3E","KLRD1","CD68","LYZ","TNFRSF17","TPSAB1")
+DotPlot(Immune,features = markers.to.plot,cols = c("blue","red"),dot.scale = 8)+RotatedAxis()
+
+DimPlot(Immune, reduction = "umap", label = TRUE, pt.size = 0.5,)
+
+Immune[['immune_type']] <- Immune@active.ident
+
+
+Myeloid <- subset(Immune,subset = immune_type=="Myeloid Cells"|immune_type=="Mast Cells")
+saveRDS(Myeloid,file = "Myeloid")
+
+B_P <- subset(Immune,subset = immune_type=="B Cells"|immune_type=="Plasma Cells")
+saveRDS(B_P,file = "B_P")
+
+
+
+
+gene <- c("CD4","CD8A","KLRF1","FCG3A","GZMK","GZMH",    
+          "HLA.DRB1","GZMB","STMN1","KLRD1","HSPA1A","TCF7",   
+          "LEF1","CCR7","MAL","IL7R","CREM","AREG",    
+          "CCL5","FOXP3","CTLA4","IL2RA","RORA","CCR6",    
+          "IL22","IL17A","IL26","NEAT1","PDCD1","LAG3",    
+          "TIGIT","CXCL13","HAVCR2")
+
+
+gene <- c("CD4","CD8A","KLRF1","FCG3A","GZMK","GZMH",    
+          "HLA.DRB1","GZMB","STMN1","KLRD1","HSPA1A","TCF7",   
+          "LEF1","CCR7","MAL","IL7R","CREM","AREG",    
+          "CCL5","FOXP3","CTLA4","IL2RA","RORA","CCR6",    
+          "IL22","IL17A","IL26","NEAT1","PDCD1","LAG3",    
+          "TIGIT","CXCL13","HAVCR2")
+
+
+
+
+Myeloid_name <- Myeloid@reductions$umap@cell.embeddings %>%
+  as.data.frame() %>%
+  cbind(Myeloid[[c("myeloid_type")]])
+
+Myeloid_name$immunecellname <- rownames(Myeloid_name)
+Myeloid_name <- Myeloid_name[,c(3,4)]
+colnames(Myeloid_name) <- c("immunecellname","barcodes")
+
+BP_names <- read.table("/home/majiao/CAC_sCRC_BP/BP_names.txt",sep = "\t",header = TRUE,
+                 check.names = FALSE)
+
+
+I_txt <- rbind(BP_names,TNK_name,Myeloid_name)
+
+
+Immune$immunecelltype <- I_txt[match(rownames(Immune@meta.data),I_txt$barcodes),1]
+
+
+
+
+
+
+
+library(Seurat)
+library(harmony)
+
+T_NK <- subset(Immune,subset = immune_type=="T_NK Cells")
+
+T_NK <- NormalizeData(T_NK)
+T_NK <- FindVariableFeatures(T_NK,selection.method = "vst",nfeatures = 2000)
+T_NK <- ScaleData(T_NK,features = rownames(T_NK))
+T_NK <- RunPCA(T_NK,features = VariableFeatures(object = T_NK))
+T_NK <- T_NK %>% RunHarmony("samples", plot_convergence = TRUE,lambda=2)
+T_NK <- FindNeighbors(T_NK,reduction = "harmony",dims = 1:15)
+T_NK <- FindClusters(T_NK,resolution = 1)
+T_NK <- RunUMAP(T_NK,reduction = "harmony",dims = 1:15)
+DefaultAssay(T_NK) <- "RNA"
+
+T_NK.AllMarkers <- FindAllMarkers(T_NK,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+
+
+
+
+DimPlot(T_NK,reduction = "umap",label = TRUE,repel = TRUE)
+DimPlot(T_NK,reduction = "umap",group.by = "status")
+
+
+
+write.table(T_NK.AllMarkers,file="T_NK.AllMarkers",sep="\t",row.names=FALSE,quote=FALSE)
+
+
+
+
+###CD4&CD8
+VlnPlot(T_NK,features = c("CD8A","CD4"))
+FeaturePlot(T_NK,features = c("CD8A","CD4","KLRD1","KLRF1"))
+DotPlot(T_NK,features = c("CD8A","CD4","KLRD1","KLRF1"))
+
+###CD8:
+#Tn
+DotPlot(T_NK,features = c("TCF7","LEF1","CCR7","SELL","MAL"))
+#Tm
+DotPlot(T_NK,features = c("IL7R","GPR183","ZFP36L2","CXCR4"))
+#Trm
+DotPlot(T_NK,features = c("ZNF683","CD52","HOPX","ID2","CXCR6","XCL1","XCL2"))
+#Temra
+DotPlot(T_NK,features = c("TBX21","ASCL2","CX3CR1","KLRG1"))
+#TNK
+DotPlot(T_NK,features = c("KLRD1","TYROBP","KIR2DL3","KIR2DL1","KIR3DL1",
+                          "KIR3DL2","CD160","EOMES","TXK","KLRC1","KIR2DL4"))
+#Tem
+DotPlot(T_NK,features = c("GZMK","CXCR5","CCR4","CD28",
+                          "CXCR3","GZMH","CD27","HLA.DRB1"))
+#Tex
+DotPlot(T_NK,features = c("PDCD1","CXCL13","LAYN"))
+#ISG+CD8+T
+DotPlot(T_NK,features = c("STAT1","IFIT1","ISG15","CCR1"))
+#Tc17
+DotPlot(T_NK,features = c("SLC4A10","KLRB1","TMIGD2","RORA","RORC","ZBTB16","IL26","IL17A","IL23R"))
+#NME1+T
+DotPlot(T_NK,features = c("NME1","NME2","MND1","SPC24","MYB"))
+
+
+
+####CD4
+
+#Tn
+DotPlot(T_NK,features = c("TCF7","LEF1","TXK","CCR7","SELL",
+                          "MAL","CXCR5","ADSL","IL16","IL7R"))
+#TNF+\Tm\Tem\Temra
+DotPlot(T_NK,features = c("IL7R","AREG","TIMP1","CREM","CCL5",
+                          "CAPG","GZMK","KLRG1","CX3CR1","TBX21"))
+#Th17
+DotPlot(T_NK,features = c("RORA","RORC","CCR6","IL23R",
+                          "IL22","IL17A","IL17F","IL26"))
+#Tfh
+DotPlot(T_NK,features = c("TOX","TOX2","IL21","CXCL13",
+                          "GNG4","CD200","BCL6"))
+#Th
+DotPlot(T_NK,features = c("ZBED2","CCL3","CCL4","IFNG",
+                          "GZMB","LAG3","HAVCR2"))
+#Treg
+DotPlot(T_NK,features = c("FOXP3","RTKN2","IL2RA"))
+#ISG+Th
+DotPlot(T_NK,features = c("STAT1","IFIT1","IRF7"))
+#NME1+T
+DotPlot(T_NK,features = c("NME1","NME2","MND1","SPC24","CCR4"))
+
+
+
+FeaturePlot(T_NK,features = c("CD8A","PDCD1"))
+
+write.table(T_NK,file = "AllMarkers",sep = "\t",quote = FALSE,row.names =TRUE)
+
+
+
+
+
+####
+
+T_NK <- RenameIdents(T_NK, `0` = "CD8_GZMK_Tem",`1` = "CD4_CCR7_Tn",`2` = "CD4_CREM_TIGIT_Tm",
+                     `3` = "CD8_GZMB_Tex",`4` = "CD4_RORA_Th17",`5` = "CD8_KLRD1_NKT",
+                     `6` = "CD4_FOXP3_Treg",`7` = "CD4_IL7R_Tm",`8` = "CD4_IL7R_Tm",
+                     `9` = "CD4_NEAT1_T",`10` = "CD8_HSPA1A_T",`11` = "CD8_GZMB_STMN1_Tex",
+                     `12` = "KLRF1_NK",`13` = "CD4_AREG_Tm",`14` = "CD8_CCR7_Tn",
+                     `15` = "CD4_CCR7_Tn",`16` = "Undifined",`17` = "Undifined",
+                     `18` = "Undifined",`19` = "CD4_CCR7_Tn",`20` = "CD4_CCR7_Tn")
+
+T_NK <- RenameIdents(T_NK, `CD8_GZMB_Tex` = "CD8_LAG3_CXCL13_Tem")
+
+
+
+
+
+
+
+
+
+DimPlot(T_NK,reduction = "umap",label = TRUE,repel = TRUE)
+T_NK[['TNK_type']] <- T_NK@active.ident
+
+
+T_NK@active.ident<- T_NK$RNA_snn_res.1
+
+
+
+DotPlot(T_NK,features = c("TGFB1"))
+
+
+VlnPlot(T_NK,features = c("CTLA4"),group.by = "orig.ident")
+
+VlnPlot(T_NK,features = c("CTLA4"),group.by = "orig.ident",idents = "CD4+Treg")
+
+
+
+markers.to.plot <- c("CD4","CD8A",
+                     "GZMK","GZMH","HLA.DRB1",
+                     "IL7R","CREM","AREG","CCL5",
+                     "TCF7","LEF1","CCR7","MAL",
+                     "FOXP3","CTLA4","IL2RA",
+                     "TNF",
+                     "KLRD1",
+                     "RORA","CCR6","IL22","IL17A","IL26",
+                     "KLRF1",
+                     "GZMB","STMN1",
+                     "PDCD1","LAG3","TIGIT","CXCL13","HAVCR2",
+                     "HSPA1A","HSPA1B",
+                     "NEAT1")
+
+DotPlot(T_NK,features = markers.to.plot,cols = c("blue","red"),dot.scale = 8)+RotatedAxis()
+
+
+
+
+
+
+
+
+
+CD8_GZMK_Tem <- FindMarkers(T_NK,ident.1 = "CD8_GZMK_Tem",min.pct = 0.25)
+CD8_GZMK_Tem <- arrange(CD8_GZMK_Tem,-avg_log2FC)
+write.table(CD8_GZMK_Tem,file = "CD8_GZMK_Tem.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+CD8_KLRD1_NKT <- FindMarkers(T_NK,ident.1 = "CD8_KLRD1_NKT",min.pct = 0.25)
+CD8_KLRD1_NKT <- arrange(CD8_KLRD1_NKT,-avg_log2FC)
+write.table(CD8_KLRD1_NKT,file = "CD8_KLRD1_NKT.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+CD8_GZMB_Tex <- FindMarkers(T_NK,ident.1 = "CD8_GZMB_Tex",min.pct = 0.25)
+CD8_GZMB_Tex <- arrange(CD8_GZMB_Tex,-avg_log2FC)
+write.table(CD8_GZMB_Tex,file = "CD8_GZMB_Tex.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+KLRF1_NK <- FindMarkers(T_NK,ident.1 = "KLRF1_NK",min.pct = 0.25)
+KLRF1_NK <- arrange(KLRF1_NK,-avg_log2FC)
+write.table(KLRF1_NK,file = "KLRF1_NK.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+CD4_AREG_Tm <- FindMarkers(T_NK,ident.1 = "CD4_AREG_Tm",min.pct = 0.25)
+CD4_AREG_Tm <- arrange(CD4_AREG_Tm,-avg_log2FC)
+write.table(CD4_AREG_Tm,file = "CD4_AREG_Tm.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+CD8_CCR7_Tn <- FindMarkers(T_NK,ident.1 = "CD8_CCR7_Tn",min.pct = 0.25)
+CD8_CCR7_Tn <- arrange(CD8_CCR7_Tn,-avg_log2FC)
+write.table(CD8_CCR7_Tn,file = "CD8_CCR7_Tn.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+
+
+
+
+
+
+CD8_CCR7_Tn <- subset(T_NK,subset = TNK_type== 'CD8_CCR7_Tn')
+Idents(CD8_CCR7_Tn) <- "status"
+jiaojiao <- FindMarkers(CD8_CCR7_Tn,
+                        ident.1= "Colitis-Associated Cancer",
+                        ident.2 = "Sporadic Colorectal Cancer",
+                        min.pct = 0.25,logfc.threshold = 0.25)
+
+
+
+
+library(Seurat)
+library(harmony)
+Myeloid <- NormalizeData(Myeloid)
+Myeloid <- FindVariableFeatures(Myeloid,selection.method = "vst",nfeatures = 2000)
+Myeloid <- ScaleData(Myeloid,features = rownames(Myeloid))
+Myeloid <- RunPCA(Myeloid,features = VariableFeatures(object = Myeloid))
+Myeloid <- Myeloid %>% RunHarmony("samples", plot_convergence = TRUE)
+Myeloid <- FindNeighbors(Myeloid,reduction = "harmony",dims = 1:15)
+Myeloid <- FindClusters(Myeloid,resolution = 0.4)
+Myeloid <- RunUMAP(Myeloid,reduction = "harmony",dims = 1:15)
+
+DefaultAssay(Myeloid) <- "RNA"
+
+
+MyeloidAllMarkers <- FindAllMarkers(Myeloid,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+DimPlot(Myeloid,reduction = "umap",group.by = "status")
+DimPlot(Myeloid,reduction = "umap",label = TRUE,repel = TRUE)
+
+
+
+Myeloid <- RenameIdents(Myeloid, `0` = "APOE_Macro", `1` = "VEGFA_Macro", `2` = "SPP1_Macro", 
+                       `3` = "APOE_Macro", `4` = "Mast Cells", `5` = "CD1C_cDC2",
+                       `6` = "Undifined", `7` = "VEGFA_Macro", `8` = "CCR7_cDC3", `9` = "S100A8_Macro", 
+                       `10` = "LILRA4_pDC", `11` = "ISG15_Macro", `12` = "STMN1_Macro", `13` = "CD1C_cDC2", 
+                       `14` = "AREG_Macro",`15` = "Mast Cells")
+Myeloid[['myeloid_type']] <- Myeloid@active.ident
+
+
+Myeloid@active.ident <- Myeloid$seurat_clusters
+
+
+
+
+
+
+
+
+
+
+# Load packages
+library(reshape2)
+library(pheatmap)
+# Function: RoeIndex -----------------------------------------------------------
+# Input: SeuratObject, vars1, vars2 ============================================
+# Generally
+# vars1 is group
+# vars2 is celltype
+RoeIndex <- function(SeuratObject, vars1, vars2){
+  Metadata <- FetchData(SeuratObject, vars = c(vars1, vars2))
+  Data <- table(Metadata[ ,1], Metadata[ ,2]) %>% as.data.frame()
+  vars1fraction <- table(Metadata[ ,1]) %>% as.matrix() %>% prop.table(., 2)
+  vars2fraction <- table(Metadata[ ,2]) %>% as.matrix() %>% prop.table(., 2)
+  Expected <- apply(Data, 1, function(x){
+    Expected <- vars1fraction[x[1],1] * vars2fraction[x[2],1]
+    return(Expected)})
+  Data$Expected <- Expected * nrow(Metadata)
+  Data$Roescore <- Data$Freq / Data$Expected
+  return(Data)
+}
+
+
+
+
+
+
+library(magrittr)
+# Roe
+data <- RoeIndex(Immune, "status", "immunecelltype")
+data <- data[ ,-3:-4]
+data$Var1 <- factor(data$Var1, levels = c("Sporadic Colorectal Cancer", "Colitis-Associated Cancer"))
+data <- acast(data, Var1 ~ Var2) %>% t()
+
+annotation_col = data.frame(
+  Type = factor(c("HER2-", "HER2-", "HER2+", "HER2+")), 
+  Stage = factor(c("Before", "After", "Before", "After")))
+annotation_col$Stage <- factor(annotation_col$Stage, levels = c("Before", "After"))
+rownames(annotation_col) = colnames(data)
+
+
+ann_colors = list(Stage = c(Before = "white", After = "firebrick"), 
+                  Type = c(`HER2-` = "#1B9E77", `HER2+` = "#D95F02"))
+pheatmap(test, annotation_col = annotation_col, annotation_colors = ann_colors, main = "Title")
+
+
+data <- data[match(c("CD74_B",
+                     "CD74_CD83_B",
+                     "CD74_CD83_RACK1_B",
+                     "CD74_TCL1A_B",
+                     "CD74_TCL1A_CD40_B",
+                     "TPSB2_B",
+                     "IGHG1_Plasma",
+                     "IGHA1_IGHA2_Plasma",
+                     "ISG15_Macro",
+                     "S100A8_Macro",
+                     "VEGFA_Macro",
+                     "SPP1_Macro",
+                     "APOE_Macro",
+                     "STMN1_Macro",
+                     "AREG_Macro",
+                     "LILRA4_pDC",
+                     "CD1C_cDC2",
+                     "CCR7_cDC3",
+                     "Mast Cells",
+                     "KLRF1_NK",
+                     "CD8_GZMK_Tem",
+                     "CD8_LAG3_CXCL13_Tem",
+                     "CD8_GZMB_STMN1_Tex",
+                     "CD8_KLRD1_NKT",
+                     "CD8_HSPA1A_T",
+                     "CD8_CCR7_Tn",
+                     "CD4_CCR7_Tn",
+                     "CD4_IL7R_Tm",
+                     "CD4_CREM_TIGIT_Tm",
+                     "CD4_AREG_Tm",
+                     "CD4_FOXP3_Treg",
+                     "CD4_RORA_Th17",
+                     "CD4_NEAT1_T",
+                     "Undifined"), rownames(data)), ]
+
+bk <- c(seq(0, 2, by = 0.2))
+pl <- pheatmap(data, scale="none",
+               cluster_rows = FALSE,
+               cluster_cols = F,
+               show_rownames = T,
+               show_colnames = T,
+               color =paletteer::paletteer_c("pals::coolwarm",n=10),
+               border=NA,
+               fontsize = 13,
+               breaks = bk,
+               display_numbers = TRUE,
+               number_color = "black",
+               fontsize_number = 13,
+               legend_breaks = seq(0, 2, 0.2))
+pl$gtable$grobs[[4]]$gp=gpar(col=Allcolor1(3), fontsize=10)
+
+
+
+
+
+
+
