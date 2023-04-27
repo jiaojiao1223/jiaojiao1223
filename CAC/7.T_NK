@@ -1,0 +1,243 @@
+library(Seurat)
+library(harmony)
+T_NK <- readRDS("/home/majiao/Immune/TNK")
+
+T_NK <- NormalizeData(T_NK)
+T_NK <- FindVariableFeatures(T_NK,selection.method = "vst",nfeatures = 2000)
+T_NK <- ScaleData(T_NK,features = rownames(T_NK))
+T_NK <- RunPCA(T_NK,features = VariableFeatures(object = T_NK))
+T_NK <- T_NK %>% RunHarmony("samples", plot_convergence = TRUE)
+T_NK <- FindNeighbors(T_NK,reduction = "harmony",dims = 1:15)
+T_NK <- FindClusters(T_NK,resolution = 1)
+T_NK <- RunUMAP(T_NK,reduction = "harmony",dims = 1:15)
+DefaultAssay(T_NK) <- "RNA"
+
+T_NK.AllMarkers <- FindAllMarkers(T_NK,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+
+
+
+
+DimPlot(T_NK,reduction = "umap",label = TRUE,repel = TRUE)
+DimPlot(T_NK,reduction = "umap",group.by = "status")
+
+
+
+write.table(T_NK.AllMarkers,file="T_NK.AllMarkers",sep="\t",row.names=FALSE,quote=FALSE)
+
+
+
+
+###CD4&CD8
+VlnPlot(T_NK,features = c("CD8A","CD4"))
+FeaturePlot(T_NK,features = c("CD8A","CD4","KLRD1","KLRF1"))
+DotPlot(T_NK,features = c("CD8A","CD4","KLRD1","KLRF1"))
+
+###CD8:
+#Tn
+DotPlot(T_NK,features = c("TCF7","LEF1","CCR7","SELL","MAL"))
+#Tm
+DotPlot(T_NK,features = c("IL7R","GPR183","ZFP36L2","CXCR4"))
+#Trm
+DotPlot(T_NK,features = c("ZNF683","CD52","HOPX","ID2","CXCR6","XCL1","XCL2"))
+#Temra
+DotPlot(T_NK,features = c("TBX21","ASCL2","CX3CR1","KLRG1"))
+#TNK
+DotPlot(T_NK,features = c("KLRD1","TYROBP","KIR2DL3","KIR2DL1","KIR3DL1",
+                          "KIR3DL2","CD160","EOMES","TXK","KLRC1","KIR2DL4"))
+#Tem
+DotPlot(T_NK,features = c("GZMK","CXCR5","CCR4","CD28",
+                          "CXCR3","GZMH","CD27","HLA.DRB1"))
+#Tex
+DotPlot(T_NK,features = c("PDCD1","CXCL13","LAYN"))
+#ISG+CD8+T
+DotPlot(T_NK,features = c("STAT1","IFIT1","ISG15","CCR1"))
+#Tc17
+DotPlot(T_NK,features = c("SLC4A10","KLRB1","TMIGD2","RORA","RORC","ZBTB16","IL26","IL17A","IL23R"))
+#NME1+T
+DotPlot(T_NK,features = c("NME1","NME2","MND1","SPC24","MYB"))
+
+
+
+####CD4
+
+#Tn
+DotPlot(T_NK,features = c("TCF7","LEF1","TXK","CCR7","SELL",
+                          "MAL","CXCR5","ADSL","IL16","IL7R"))
+#TNF+\Tm\Tem\Temra
+DotPlot(T_NK,features = c("IL7R","AREG","TIMP1","CREM","CCL5",
+                          "CAPG","GZMK","KLRG1","CX3CR1","TBX21"))
+#Th17
+DotPlot(T_NK,features = c("RORA","RORC","CCR6","IL23R",
+                          "IL22","IL17A","IL17F","IL26"))
+#Tfh
+DotPlot(T_NK,features = c("TOX","TOX2","IL21","CXCL13",
+                          "GNG4","CD200","BCL6"))
+#Th
+DotPlot(T_NK,features = c("ZBED2","CCL3","CCL4","IFNG",
+                          "GZMB","LAG3","HAVCR2"))
+#Treg
+DotPlot(T_NK,features = c("FOXP3","RTKN2","IL2RA"))
+#ISG+Th
+DotPlot(T_NK,features = c("STAT1","IFIT1","IRF7"))
+#NME1+T
+DotPlot(T_NK,features = c("NME1","NME2","MND1","SPC24","CCR4"))
+
+
+
+FeaturePlot(T_NK,features = c("CD8A","PDCD1"))
+
+write.table(T_NK,file = "AllMarkers",sep = "\t",quote = FALSE,row.names =TRUE)
+
+
+
+
+
+####
+
+T_NK <- RenameIdents(T_NK, `0` = "CD4_CCR7_Tn",`1` = "CD8_GZMK_Tem",`2` = "CD4_IL7R_Tm",
+                     `3` = "CD4_FOXP3_Treg",`4` = "CD4_TNF_T",`5` = "CD8_KLRD1_NKT",
+                     `6` = "CD4_CCR7_Tn",`7` = "CD4_IL7R_Tm",`8` = "CD4_RORA_Th17",
+                     `9` = "CD4_TOX2_Tfh",`10` = "CD4_GNB2L1_T",`11` = "KLRF1_NK",
+                     `12` = "CD4_SSR4_T",`13` = "CD8_CCR7_Tn",`14` = "Undifined",
+                     `15` = "CD8_GZMB_Tex",`16` = "CD4_FABP1_T",`17` = "CD4_CCR7_Tn",
+                     `18` = "CD8_GZMK_Tem",`19` = "CD4_SNHG5_T",`20` = "Undifined")
+
+T_NK <- RenameIdents(T_NK, `CD8_GZMB_Tex` = "CD8_STMN1_GZMB_Tex")
+
+
+
+
+
+
+
+
+
+DimPlot(T_NK,reduction = "umap",label = TRUE,repel = TRUE)
+T_NK[['TNK_type']] <- T_NK@active.ident
+
+
+T_NK@active.ident<- T_NK$RNA_snn_res.1
+
+
+
+DotPlot(T_NK,features = c("TGFB1"))
+
+
+VlnPlot(T_NK,features = c("CTLA4"),group.by = "orig.ident")
+
+VlnPlot(T_NK,features = c("CTLA4"),group.by = "orig.ident",idents = "CD4+Treg")
+
+
+
+markers.to.plot <- c("CD4","CD8A",
+                     "KLRF1","FCGR3A",
+                     "GZMK","GZMH","HLA.DRB1",
+                     "GZMB","STMN1",
+                     "KLRD1",
+                     "TCF7","LEF1","CCR7","MAL",
+                     "IL7R","CREM","CCL5",
+                     "FOXP3","CTLA4","IL2RA",
+                     "TNF",
+                     "RORA","CCR6","IL22","IL17A","IL26",
+                     "TOX","TOX2","CD200","CXCR5",
+                     "PDCD1","LAG3","TIGIT","CXCL13","HAVCR2",
+                     "GNB2L1",
+                     'SSR4',
+                     "FABP1",
+                     "SNHG5")
+
+DotPlot(T_NK,features = markers.to.plot,cols = c("blue","red"),dot.scale = 8)+RotatedAxis()
+
+
+
+
+Tex <- subset(T_NK,subset = TNK_type =="CD8_GZMB_Tex")
+Tex <- NormalizeData(Tex)
+Tex <- FindVariableFeatures(Tex,selection.method = "vst",nfeatures = 2000)
+Tex <- ScaleData(Tex,features = rownames(Tex))
+Tex <- RunPCA(Tex,features = VariableFeatures(object = Tex))
+Tex <- Tex %>% RunHarmony("samples", plot_convergence = TRUE,lambda=2)
+Tex <- FindNeighbors(Tex,reduction = "harmony",dims = 1:15)
+Tex <- FindClusters(Tex,resolution = 0.3)
+Tex <- RunUMAP(Tex,reduction = "harmony",dims = 1:15)
+DefaultAssay(Tex) <- "RNA"
+
+DimPlot(Tex,reduction = "umap",group.by = "status")
+
+
+
+Tex_markers <- FindMarkers(T_NK,ident.1 ="CD8_GZMB_Tex",logfc.threshold = 0.25)
+Treg_markers <- FindMarkers(T_NK,ident.1 ="CD4_FOXP3_Treg",logfc.threshold = 0.25)
+
+library(dplyr)
+Tex_markers <- arrange(Tex_markers,-avg_log2FC)
+Treg_markers <- arrange(Treg_markers,-avg_log2FC)
+
+write.table(Tex_markers,file = "Tex_markers.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+write.table(Treg_markers,file = "Treg_markers.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+###########GSVA
+tex_matrix <- Tex@assays$RNA@counts
+tex_matrix <- data.frame(tex_matrix)
+
+
+
+
+PDL1 <- c(10538,940,917,920,1460,
+          27436,2353,3458,3716,
+          3725,4792,5133,5295,10125,6774)
+PDL1 <- data.frame(PDL1)
+PDL1$entrezID <- PDL1$PDL1
+PDL1 <- merge(PDL1,rt,by="entrezID")
+PDL1 <- PDL1$genes
+PDL1 <- data.frame(PDL1)
+
+PDL1$gene_short_name <- PDL1$PDL1
+PDL1 <- merge(PDL1,Track_genes,by="gene_short_name")
+library(dplyr)
+PDL1 <- arrange(PDL1,-morans_I)
+
+
+pathway <- PDL1$gene_short_name
+geneSets <- list(pathway)
+names(geneSets) <- c("PDL1 gene list")
+
+PDL1 <- gsva(as.matrix(tex_matrix),geneSets,method='gsva',
+             kcdf='Gaussian',abs.ranking=TRUE)
+PDL1 <- t(PDL1)
+PDL1 <- data.frame(PDL1)
+
+
+PDL1$CB <- rownames(PDL1)
+
+umap <- Tex@reductions$umap@cell.embeddings %>%
+  as.data.frame() %>%
+  cbind(status = Tex$status)
+umap$CB <- rownames(umap)
+
+PDL1 <- merge(umap,PDL1,by="CB")
+
+
+
+
+
+ggplot(PDL1,aes(x = reorder(status.x,PDL1.gene.list), y = PDL1.gene.list, fill = status.x, group = status.x))+geom_violin()+
+  geom_boxplot(width=0.1,position=position_dodge(0.9),outlier.colour = NA,fill="white")+
+  theme_bw()+
+  theme(legend.position="none",
+        axis.text.x = element_text(hjust = 0.5, vjust = 0.5),
+        axis.text.y = element_text(hjust = 0.5, vjust = 0.5),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text( size=rel(1)),
+        panel.border = element_blank(),
+        axis.line = element_line(colour = "black",size=1)
+  )+scale_fill_manual(values = color)+
+  theme(text = element_text(size = 18), 
+        axis.text.x = element_text(size = 18), 
+        plot.title = element_text(hjust = 0.5), 
+        legend.position = c(0.17,0.75))+
+  ggtitle("Violin Plot of PD-L1 expression and PD-1 checkpoint pathway cancer signaling Level in different disease status") + 
+  xlab("Disease Status") +  ylab("PD-L1 expression and PD-1 checkpoint pathway cancer")
