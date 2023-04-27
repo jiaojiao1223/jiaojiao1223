@@ -200,3 +200,297 @@ ggboxplot(umap, x="status", y="IL17",
           color="status", palette = c("#1E94A0","#FEC0C1","#DC2543"),
           add = "jitter") +
   stat_compare_means(comparisons = my_compares)
+
+
+
+library(monocle3, lib.loc = "/home/majiao/ENTER/envs/monocle3/lib/R/library")
+library(Seurat)
+library(leidenbase)
+library(ggplot2)
+library(tidyverse)
+library(patchwork)
+library(magrittr)
+data <- GetAssayData(Tex, assay = 'RNA', slot = 'counts')
+cell_metadata <- Tex@meta.data
+gene_annotation <- data.frame(gene_short_name = rownames(data))
+rownames(gene_annotation) <- rownames(data)
+cds <- new_cell_data_set(data,
+                         cell_metadata = cell_metadata,
+                         gene_metadata = gene_annotation)
+
+cds <- preprocess_cds(cds, num_dim = 50)
+
+cds <- reduce_dimension(cds,preprocess_method = "PCA", reduction_method = "UMAP") #preprocess_method默认是PCA
+cds <- cluster_cells(cds, reduction_method = "UMAP")
+
+cds.embed <- cds@int_colData$reducedDims$UMAP
+int.embed <- Embeddings(Tex, reduction = "umap")
+int.embed <- int.embed[rownames(cds.embed),]
+cds@int_colData$reducedDims$UMAP <- int.embed
+
+cds <- learn_graph(cds)
+
+
+Clustercolor <-c("#DC2543","#1E94A0","#FEC0C1")
+
+
+p1 = plot_cells(cds, color_cells_by = "status", label_cell_groups = F, label_groups_by_cluster=FALSE,
+               label_leaves=FALSE, label_branch_points=FALSE,cell_size = 2,
+               trajectory_graph_segment_size = 1)+
+  scale_colour_manual(values = Clustercolor)+
+  theme_bw()+
+  labs(title = "", fill = "Celltype")+
+  xlab("UMAP_1")+
+  ylab("UAMP_2")+
+  theme(legend.title=element_blank())+
+  theme(axis.text=element_text(family = "Arial", size=13, face = "bold"), # 坐标轴刻度
+        axis.title=element_text(family = "Arial", size=13, face="bold"), # 坐标轴标题
+        panel.border = element_rect(fill=NA,color="black", size=1, linetype="solid"), # 调整坐标轴边框的粗细
+        panel.background = element_blank(), #去除背景
+        panel.grid=element_blank(), #去除网格线
+        legend.text = element_text(size = 12),
+        axis.title.x = element_text(margin = margin(t = 0.4, unit = "cm")),
+        axis.title.y = element_text(margin = margin(t = 0, r = 0.4, b = 0, l = 0, unit = "cm")))
+
+
+ggsave("plot.png",p1,width = 10.5, height = 6)
+
+
+
+
+cds <- order_cells(cds)
+
+p2 = plot_cells(cds, color_cells_by = "pseudotime", label_cell_groups = FALSE, 
+               label_leaves = FALSE,  label_branch_points = FALSE,cell_size = 2,
+               trajectory_graph_segment_size = 1)+
+  xlab("UMAP_1")+
+  ylab("UAMP_2")+
+  theme(legend.title=element_blank())+
+  theme(axis.text=element_text(family = "Arial", size=13, face = "bold"), # 坐标轴刻度
+        axis.title=element_text(family = "Arial", size=13, face="bold"), # 坐标轴标题
+        panel.border = element_rect(fill=NA,color="black", size=1, linetype="solid"), # 调整坐标轴边框的粗细
+        panel.background = element_blank(), #去除背景
+        panel.grid=element_blank(), #去除网格线
+        legend.text = element_text(size = 12),
+        axis.title.x = element_text(margin = margin(t = 0.4, unit = "cm")),
+        axis.title.y = element_text(margin = margin(t = 0, r = 0.4, b = 0, l = 0, unit = "cm")))        
+
+
+ggsave("plot.png",p2,width = 9, height = 6)
+
+
+
+
+#计算基因按照轨迹的变化
+Track_genes <- graph_test(cds, neighbor_graph="principal_graph", cores=6)
+Track_genes <- Track_genes[,c(5,2,3,4,1,6)] %>% filter(q_value < 1e-20)
+
+trackgene$samples<-
+  ifelse(grepl("ATP",trackgene$gene_short_name),
+         "Yes","No")
+trackgene <- subset(trackgene, subset= samples=='No')
+
+
+
+#挑选top10画图展示
+Track_genes_sig <- Track_genes %>% top_n(n=10,morans_I) %>%
+  pull(gene_short_name) %>% as.character()
+
+
+DYGG <- Track_genes[Track_genes_sig,]
+#基因表达趋势图
+p1 <- plot_genes_in_pseudotime(cds[c('VEGFA','HIF1A',"EREG"),], color_cells_by="status", 
+                         min_expr=0.5, ncol = 1,cell_size = 2)+
+  scale_colour_manual(values = Clustercolor)
+
+ggsave("plot.png",p1,width = 6, height = 9)
+
+plot_genes_by_group(cds,gene,group_cells_by = "status")+
+  ggtitle("Exhausted genes")
+
+  
+###chemical carinogenesis-reactive oxygen species
+
+gene <- c("PDCD1","CTLA4","HAVCR2","LAG3","TIGIT","CXCL13")
+
+
+
+ggsave("plot.png",p1,width = 6.5, height = 10.5)
+#FeaturePlot图
+plot_cells(cds, genes=Track_genes_sig, show_trajectory_graph=FALSE,
+           label_cell_groups=FALSE,  label_leaves=FALSE)
+#在这里运用到文章的话，应该可以这样用，你可以用这些变化top基因来讲一些东西，或者你可以show你自己fouce on的gene
+
+
+##寻找共表达模块
+
+
+
+genelist <- pull(Track_genes,gene_short_name) %>% as.character()
+gene_module <- find_gene_modules(cds[genelist,], resolution=1e-2, cores = 10)
+cell_group <- tibble::tibble(cell=row.names(colData(cds)), 
+                             cell_group=colData(cds)$status)
+
+agg_mat <- aggregate_gene_expression(cds, gene_module, cell_group)
+row.names(agg_mat) <- stringr::str_c("Module ", row.names(agg_mat))
+
+pheatmap::pheatmap(agg_mat, scale="column", clustering_method="ward.D2")
+
+
+##############VEGFA_module
+gene_module1 <- subset(gene_module,subset=module=="1"|module=="6"|module=="7"|module=="8"|module=="9"|module=="17"|module=="18")
+############Tex_module
+gene_module1 <- subset(gene_module,subset=module=="1"|module=="2"|module=="4"|module=="6"|module=="9")
+
+
+
+
+
+genes <- gene_module1$id
+
+
+dygg <- Track_genes[Track_genes_sig,]
+
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(enrichplot)
+library(ggplot2)
+
+mm7[which(mm7$`Fold-Change`>0),'up_down']<-'up'
+mm7[which(mm7$`Fold-Change`<0),'up_down']<-'down'
+head(mm7)
+mm7_up <- subset(mm7,subset=mm7$up_down=="up")
+
+genes <- rownames(VEGFA)
+
+genes <- Track_genes$gene_short_name
+genes <- mm7$Gene_symbol
+
+entrezIDs <- mget(genes,org.Hs.egSYMBOL2EG,ifnotfound = NA)
+entrezIDs <- as.character(entrezIDs)
+out <- cbind(genes,entrezID = entrezIDs)
+write.table(out,file = "id.txt",sep = "\t",quote = FALSE,row.names = FALSE)
+rt <- read.table("/home/majiao/validation/id.txt",sep = "\t",header = TRUE,
+                 check.names = FALSE)
+rt <- rt[is.na(rt[,"entrezID"])==FALSE]
+gene <- rt$entrezID
+
+#GO富集分析
+GG <- enrichGO(gene = gene,
+               OrgDb = org.Hs.eg.db,
+               pvalueCutoff = 0.05,
+               qvalueCutoff = 0.05,
+               ont = "all",
+               readable = TRUE)
+
+
+#柱状图
+barplot(GG,drop = TRUE,showCategory = 10,split = "ONTOLOGY")+
+  facet_grid(ONTOLOGY~.,scale = 'free')
+
+#气泡图
+dotplot(GG,showCategory = 5,split = "ONTOLOGY")+
+  facet_grid(ONTOLOGY~.,scale = 'free')
+
+ego_ALL <- enrichGO(gene = gene,
+                    OrgDb = org.Hs.eg.db,
+                    ont = "ALL",
+                    pAdjustMethod = "BH",
+                    pvalueCutoff = 0.05,
+                    qvalueCutoff = 0.05)
+
+ego_ALL <- data.frame(ego_ALL)
+
+ego_CC <- enrichGO(gene = gene,
+                   OrgDb = org.Hs.eg.db,
+                   ont = "CC",
+                   pAdjustMethod = "BH",
+                   pvalueCutoff = 0.05,
+                   qvalueCutoff = 0.05)
+
+ego_MF <- enrichGO(gene = gene,
+                   OrgDb = org.Hs.eg.db,
+                   ont = "MF",
+                   pAdjustMethod = "BH",
+                   pvalueCutoff = 0.05,
+                   qvalueCutoff = 0.05)
+ego_BP <- enrichGO(gene = gene,
+                   OrgDb = org.Hs.eg.db,
+                   ont = "BP",
+                   pAdjustMethod = "BH",
+                   pvalueCutoff = 0.05,
+                   qvalueCutoff = 0.05)
+
+p_BP <- barplot(ego_BP,showCategory = 10)+ggtitle("barplot for biological process")
+p_CC <- barplot(ego_CC,showCategory = 10)+ggtitle("barplot for cellular component")
+p_MF <- barplot(ego_MF,showCategory = 10)+ggtitle("barplot for molecular function")
+
+plotc <- p_BP/p_CC/p_MF
+
+plotd <- p_BP1/p_cc1/p_MF
+
+
+
+
+###KEGG富集分析
+KK <- enrichKEGG(gene = gene,
+                 organism = "hsa",
+                 pvalueCutoff = 0.05,
+                 qvalueCutoff = 0.05)
+
+
+#柱状图
+p1 <- barplot(KK,drop = TRUE,showCategory = 20)+
+  theme(legend.title=element_blank())+
+  theme(axis.text=element_text(family = "Arial", size=13, face = "bold"), # 坐标轴刻度
+        axis.title=element_text(family = "Arial", size=13, face="bold"), # 坐标轴标题
+        panel.border = element_rect(fill=NA,color="black", size=1, linetype="solid"), # 调整坐标轴边框的粗细
+        panel.background = element_blank(), #去除背景
+        panel.grid=element_blank(), #去除网格线
+        axis.title.x = element_text(margin = margin(t = 0.4, unit = "cm")),
+        axis.title.y = element_text(margin = margin(t = 0, r = 0.4, b = 0, l = 0, unit = "cm")))
+
+#气泡图
+p1 <- dotplot(KK,showCategory = 20)+
+  theme(legend.title=element_blank())+
+  theme(axis.text=element_text(family = "Arial", size=13, face = "bold"), # 坐标轴刻度
+        axis.title=element_text(family = "Arial", size=13, face="bold"), # 坐标轴标题
+        panel.border = element_rect(fill=NA,color="black", size=1, linetype="solid"), # 调整坐标轴边框的粗细
+        panel.background = element_blank(), #去除背景
+        panel.grid=element_blank(), #去除网格线
+        axis.title.x = element_text(margin = margin(t = 0.4, unit = "cm")),
+        axis.title.y = element_text(margin = margin(t = 0, r = 0.4, b = 0, l = 0, unit = "cm")))
+
+
+ggsave("plot.png",p1,width = 12, height = 12)
+
+
+
+DYGG <- subset(KK@result,subset=Description=="HIF-1 signaling pathway")
+DYGG <- DYGG$geneID
+DYGG <- subset(rt,subset=entrezID=="226"|entrezID=="596"|entrezID=="1026"|entrezID=="1906"
+               |entrezID=="1977"|entrezID=="2026"|entrezID=="2321"|entrezID=="2597"
+               |entrezID=="3091"|entrezID=="3099"|entrezID=="3162"|entrezID=="3460"
+               |entrezID=="3569"|entrezID=="3570"|entrezID=="3939"|entrezID=="4790"
+               |entrezID=="5209"|entrezID=="5214"|entrezID=="5579"|entrezID=="6513"
+               |entrezID=="6774"|entrezID=="7076"|entrezID=="7099"|entrezID=="7422"
+               |entrezID=="6921"|entrezID=="6923")
+dygg <- DYGG$genes
+DotPlot(Myeloid,features = dygg)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
