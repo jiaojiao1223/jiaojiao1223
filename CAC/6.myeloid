@@ -1,0 +1,202 @@
+Myeloid <- readRDS("/home/majiao/Myeloid/myeloid")
+
+
+DimPlot(Myeloid,reduction = "umap",label = TRUE,repel = TRUE)
+DimPlot(Myeloid,reduction = "umap",group.by = "status")
+
+
+
+gene <- c("CD68","CD14",
+          "ISG15","CXCL10",
+          "S100A8","S100A9",
+          "VEGFA","EREG",
+          "APOE","C1QB",
+          "MRC1",
+          "HSPA1A","HSPA1B",
+          "LILRA4","GZMB",
+          "CLEC9A",
+          "CD1C","CLEC10A",
+          "CCR7","LAMP3",
+          "TPSAB1","CPA3")
+
+Myeloid <- RenameIdents(Myeloid, `0` = "APOE_Macro", `1` = "Mast Cells", `2` = "S100A8_Macro", 
+                        `3` = "S100A8_Macro", `4` = "APOE_Macro", `5` = "CD1C_cDC2",
+                        `6` = "VEGFA_Macro", `7` = "MRC1_Macro", `8` = "S100A8_Macro", `9` = "CLEC9A_cDC1", 
+                        `10` = "Undifined", `11` = "HSPA1A_Macro", `12` = "CCR7_cDC3", `13` = "APOE_Macro", 
+                        `14` = "ISG15_Macro",`15` = "Undifined", `16` = "Undifined",
+                        `17` = "LILRA4_pDC",`18` = "Mast Cells", `19` = "Mast Cells")
+Myeloid[['myeloid_type']] <- Myeloid@active.ident
+
+
+
+
+VEGFA <- subset(Myeloid,subset =myeloid_type =="VEGFA_Macro")
+
+VEGFA <- NormalizeData(VEGFA)
+VEGFA <- FindVariableFeatures(VEGFA,selection.method = "vst",nfeatures = 2000)
+VEGFA <- ScaleData(VEGFA,features = rownames(VEGFA))
+VEGFA <- RunPCA(VEGFA,features = VariableFeatures(object = VEGFA))
+VEGFA <- VEGFA %>% RunHarmony("GEO", plot_convergence = TRUE)
+VEGFA <- FindNeighbors(VEGFA,reduction = "harmony",dims = 1:15)
+VEGFA <- FindClusters(VEGFA,resolution = 0.5)
+VEGFA <- RunUMAP(VEGFA,reduction = "harmony",dims = 1:15)
+DefaultAssay(VEGFA) <- "RNA"
+
+DimPlot(VEGFA,reduction = "umap",group.by = "status")
+
+
+
+umap <- Myeloid@reductions$umap@cell.embeddings %>%
+  as.data.frame() %>%
+  cbind(cell_type = Myeloid@meta.data$myeloid_type)
+
+umap$barcodes <- rownames(umap)
+umap <- umap[,c(4,3)]
+
+
+VEGFA_markers <- FindMarkers(Myeloid,ident.1 = "VEGFA_Macro",min.pct = 0.25)
+
+IGS15_markers <- FindMarkers(Myeloid,ident.1 = "ISG15_Macro",min.pct = 0.25)
+
+
+library(dplyr)
+VEGFA_markers<- arrange(VEGFA_markers,-avg_log2FC)
+
+IGS15_markers<- arrange(IGS15_markers,-avg_log2FC)
+
+
+write.table(VEGFA_markers,file = "VEGFA_markers.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+
+
+
+GSVA <- read.table("/home/majiao/Myeloid/IBD_CRC_GSVA.txt",sep = "\t",header = TRUE,
+                 check.names = FALSE)
+
+
+
+Myeloid_celltype <- subset(Myeloid@meta.data,select = c("myeloid_type"))
+write.table(Myeloid_celltype,file = "Myeloid_celltype.txt",sep = "\t",quote = FALSE,row.names = TRUE)
+
+#########TNF
+IL17 <- c(6364,1051,1440,2919,3627,2920,2921,6374,2353,3320,
+        3326,132014,3553,3569,3725,3727,5597,4790,4792,5743,
+         6279,6280,7124,7128,3576,6354)
+IL17 <- data.frame(IL17)
+IL17$entrezID <-IL17$IL17
+IL17 <- merge(IL17,rt,by="entrezID")
+IL17 <- IL17$genes
+IL17 <- data.frame(IL17)
+
+IL17$gene_short_name <- IL17$IL17
+
+IL17 <- merge(Track_genes,IL17,by="gene_short_name")
+IL17 <- arrange(IL17,-morans_I)
+
+
+#########TNF
+TNF <- c(602,330,6364,6352,1051,8837,9586,1435,2919,3627,2920,
+        2921,6374,1906,2353,3383,3553,3569,3659,3725,3726,5606,
+        1326,197259,4323,4790,4792,5743,9021,7124,7128,7132,7133,7185)
+TNF <- data.frame(TNF)
+TNF$entrezID <-TNF$TNF
+TNF <- merge(TNF,rt,by="entrezID")
+TNF <- TNF$genes
+TNF <- data.frame(TNF)
+
+TNF$gene_short_name <- TNF$TNF
+
+TNF <- merge(Track_genes,TNF,by="gene_short_name")
+TNF <- arrange(TNF,-morans_I)
+
+
+########NF_KB
+NF_KB <- c(472,596,597,330,6351,
+          9560,8837,2919,2920,2921,
+          1540,23586,4616,3383,3553,
+          3554,23643,10892,4615,4790,
+          4791,4792,5579,5743,5971,
+          7099,7124,7128,7132,10673,
+          8740,7185,7706,3576,388372)
+
+NF_KB <- data.frame(NF_KB)
+NF_KB$entrezID <-NF_KB$NF_KB
+NF_KB <- merge(NF_KB,rt,by="entrezID")
+NF_KB <- NF_KB$genes
+NF_KB <- data.frame(NF_KB)
+
+NF_KB$gene_short_name <- NF_KB$NF_KB
+
+NF_KB <- merge(Track_genes,NF_KB,by="gene_short_name")
+NF_KB <- arrange(NF_KB,-morans_I)
+
+#########HIF1A
+
+HIF1A <- c(226,596,1026,1906,1977,
+           2026,2321,2597,3091,3099,
+           3162,3460,3569,3570,3939,
+           4790,5209,5214,5579,6513,
+           6774,7076,7099,7422,6921,6923)
+HIF1A <- data.frame(HIF1A)
+HIF1A$entrezID <- HIF1A$HIF1A
+HIF1A <- merge(HIF1A,rt,by="entrezID")
+HIF1A <- HIF1A$genes
+HIF1A <- data.frame(HIF1A)
+
+HIF1A$gene_short_name <- HIF1A$HIF1A
+HIF1A <- merge(Track_genes,HIF1A,by="gene_short_name")
+
+HIF1A <- arrange(HIF1A,-morans_I)
+#########
+
+VEGFA_matrix <- VEGFA@assays$RNA@counts
+VEGFA_matrix <- data.frame(VEGFA_matrix)
+
+library(GSVA)
+library(GSVAdata)
+library(GSEABase)
+library(limma)
+library(tidyverse)
+
+###########GSVA
+
+pathway <- IL17$gene_short_name
+
+
+geneSets <- list(pathway)
+names(geneSets) <- c("IL17")
+
+IL17 <- gsva(as.matrix(VEGFA_matrix),geneSets,method='gsva',
+             kcdf='Gaussian',abs.ranking=TRUE)
+IL17 <- t(IL17)
+IL17 <- data.frame(IL17)
+
+IL17$CB <- rownames(IL17)
+
+
+
+
+
+umap <- VEGFA@reductions$umap@cell.embeddings %>%
+  as.data.frame() %>%
+  cbind(status=VEGFA$status)
+umap$CB <- rownames(umap)
+
+umap <- merge(umap,NF_KB,by="CB")
+umap <- merge(umap,HIF1A,by="CB")
+umap <- merge(umap,TNF,by="CB")
+umap <- merge(umap,IL17,by="CB")
+
+
+my_compares <- list(c("Colitis-Associated Cancer","Ulcerative Colitis"),
+                   c("Ulcerative Colitis","Healthy"),
+                   c("Colitis-Associated Cancer","Healthy")) 
+
+umap$status <- factor(umap$status,
+                      levels = c("Healthy",
+                                 "Ulcerative Colitis",
+                                 "Colitis-Associated Cancer"))
+ggboxplot(umap, x="status", y="IL17",
+          color="status", palette = c("#1E94A0","#FEC0C1","#DC2543"),
+          add = "jitter") +
+  stat_compare_means(comparisons = my_compares)
