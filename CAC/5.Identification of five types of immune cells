@@ -1,0 +1,172 @@
+Immune <- readRDS("/home/majiao/IBD-CRC/Immune")
+
+
+library(Seurat)
+library(harmony)
+Immune <- NormalizeData(Immune)
+Immune <- FindVariableFeatures(Immune,selection.method = "vst",nfeatures = 2000)
+Immune <- ScaleData(Immune,features = rownames(Immune))
+Immune <- RunPCA(Immune,features = VariableFeatures(object = Immune))
+Immune <- Immune %>% RunHarmony("samples", plot_convergence = TRUE)
+Immune <- FindNeighbors(Immune,reduction = "harmony",dims = 1:15)
+Immune <- FindClusters(Immune,resolution = 0.5)
+Immune <- RunUMAP(Immune,reduction = "harmony",dims = 1:15)
+
+DefaultAssay(Immune) <- "RNA"
+
+
+
+Immune <- FindAllMarkers(Immune,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+DimPlot(Immune,reduction = "umap",group.by = "orig.ident")
+DimPlot(Immune,reduction = "umap",label = TRUE,repel = TRUE)
+
+
+
+DefaultAssay(Immune) <- "RNA"
+
+VlnPlot(Immune,features = c("CD19"))
+FeaturePlot(Immune,features = c("CD19","MS4A1"))
+FeaturePlot(Immune,features = c("CD3D","CD3E"))
+FeaturePlot(Immune,features = c("CD68","CD14"))
+FeaturePlot(Immune,features = c("TNFRSF17"))
+FeaturePlot(Immune,features = c("MS4A2","TPSAB1"))
+FeaturePlot(Immune,features = c("CD19","MS4A1","CD3D","CD3E","CD68","CD14","TNFRSF17","MS4A2","TPSAB1","KLRD1","KLRF1"))
+
+DotPlot(Immune,features = c("CD19","MS4A1",
+                            "CD3D","CD3E",
+                            "FGFBP2",
+                            "LYZ","CD68",
+                            "TNFRSF17","SDC1",
+                            "TPSAB1","CPA3"))
+
+
+DimPlot(Immune,reduction = "umap",label = TRUE,repel = TRUE,group.by = "seurat_clusters")
+FeaturePlot(Immune,features = c("TPSAB1","CPA3"))
+
+
+
+
+
+
+Immune <- RenameIdents(Immune, `0` = "B Cells", `1` = "Plasma Cells", `2` = "T_NK Cells", 
+                           `3` = "T_NK Cells", `4` = "T_NK Cells", `5` = "Plasma Cells",
+                           `6` = "T_NK Cells", `7` = "Plasma Cells", `8` = "Myeloid Cells", `9` = "Myeloid Cells", 
+                           `10` = "Plasma Cells", `11` = "Mast Cells", `12` = "Plasma Cells", `13` = "T_NK Cells", 
+                           `14` = "Plasma Cells",`15` = "Plasma Cells", `16` = "B Cells")
+
+
+
+markers.to.plot <- c("CD19","MS4A1","CD3D","CD3E","KLRD1","CD68","LYZ","TNFRSF17","TPSAB1")
+DotPlot(Immune,features = markers.to.plot,cols = c("blue","red"),dot.scale = 8)+RotatedAxis()
+
+
+
+
+DimPlot(Immune, reduction = "umap", label = TRUE, pt.size = 0.5,)
+
+
+
+Immune[['immune_type']] <- Immune@active.ident
+
+
+Myeloid <- subset(Immune,subset=immune_type!='T_NK Cells')
+Myeloid <- subset(Myeloid,subset=immune_type!='B Cells')
+Myeloid <- subset(Myeloid,subset=immune_type!='Plasma Cells')
+saveRDS(Myeloid,file = "Myeloid")
+
+TNK <- subset(Immune,subset=immune_type=='T_NK Cells')
+saveRDS(TNK,file = "TNK")
+
+B_P <- subset(Immune,subset=immune_type!='T_NK Cells')
+B_P <- subset(B_P,subset=immune_type!='Mast Cells')
+B_P <- subset(B_P,subset=immune_type!='Myeloid Cells')
+saveRDS(B_P,file = "B_P")
+
+
+
+
+
+
+
+
+
+B_P <- readRDS("/home/majiao/Immune/B_P")
+
+
+library(Seurat)
+B_P <- NormalizeData(B_P)
+B_P <- FindVariableFeatures(B_P,selection.method = "vst",nfeatures = 2000)
+B_P <- ScaleData(B_P,features = rownames(B_P))
+B_P <- RunPCA(B_P,features = VariableFeatures(object = B_P))
+B_P <- FindNeighbors(B_P,dims = 1:15)
+B_P <- FindClusters(B_P,resolution = 0.6)
+B_P <- RunUMAP(B_P,dims = 1:15)
+
+DefaultAssay(B_P) <- "RNA"
+B_P <- FindAllMarkers(B_P,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+
+
+
+
+DimPlot(B_P,reduction = "umap",label = TRUE,repel = TRUE)
+
+
+
+
+
+
+B_P.Allmarkers <- FindAllMarkers(B_P,only.pos = TRUE,min.pct = 0.25,logfc.threshold = 0.25)
+
+B_P <- RenameIdents(B_P, `0` = "Brm", `1` = "HLA-DRA+ B", `2` = "IGHA1+ Plasma", 
+                       `3` = "IGHA1+ Plasma", `4` = "HLA-DRA+ B", `5` = "Brm",
+                       `6` = "IGHA1+ Plasma", `7` = "IGHG1+ Plasma", `8` = "IGHA1+ Plasma", `9` = "Brm", 
+                       `10` = "IGJ+ Plasma", `11` = "CD27+ Bn", `12` = "IGHG1+ Plasma", `13` = "IGHA1+ Plasma", 
+                       `14` = "IGHG1+ Plasma",`15` = "IGJ+ Plasma", `16` = "IGHA1+ Plasma", `17` = "Brm",
+                       `18` = "IGHA1+ Plasma", `19` = "IGJ+ Plasma", `20` = "IGHA1+ Plasma", `21` = "Plasmablast", 
+                       `22` = "IGHG1+ Plasma",`23` = "Plasmablast", `24` = "CLDN4+ B", `25` = "IGHG1+ Plasma",
+                       `26` = "Plasmablast", `27` = "IGJ+ Plasma", `28` = "Brm",
+                       `29` = "IGHA1+ Plasma")
+DimPlot(B_P,reduction = "umap",label = TRUE,repel = TRUE)
+
+
+markers.to.plot <- c("CD79A","CD19","MS4A1","TNFRSF17",
+                     "CD69","CD44","KLF2","SELL","ITGAE",
+                     "CD27","HLA-DRA","CLDN4","IGHA1","IGHG1","IGJ")
+DotPlot(B_P,features = markers.to.plot,cols = c("blue","red"),dot.scale = 8)+RotatedAxis()
+
+B_P[['BP_type']] <- B_P@active.ident
+
+DotPlot(B_P,features = c("ATG16L2"),group.by = "seurat_clusters")
+
+
+
+
+
+M_txt <- read.table("/home/majiao/Immune/Myeloid_celltype.txt",sep = "\t",header = TRUE,
+                 check.names = FALSE)
+T_txt <- read.table("/home/majiao/Immune/TNK_celltype.txt",sep = "\t",header = TRUE,
+                    check.names = FALSE)
+B_txt <- read.table("/home/majiao/Immune/BP_celltype.txt",sep = "\t",header = TRUE,
+                    check.names = FALSE)
+
+
+
+
+
+#########cellphonedb
+I_txt <- rbind(M_txt,T_txt,B_txt)
+
+
+Immune$allimmunecelltype <- I_txt[match(rownames(Immune@meta.data),I_txt$barcodes),2]
+
+
+
+
+
+
+Immune$status[which(Immune$status=="Colorectal Cancer")] <-'Colitis-Associated Cancer'
+
+
+
+
+
