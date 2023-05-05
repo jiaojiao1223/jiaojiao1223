@@ -1,0 +1,44 @@
+library(VSOLassoBag, lib.loc = "/home/chywang/miniconda3/envs/VSOLassoBag/lib/R/library")
+setwd("/home/chywang/majiao/")
+out_mat <- read.table("/home/chywang/majiao/Label.txt", header = T)
+mat <- t(read.table("/home/chywang/majiao/matrix.txt"))
+mat <- mat[out_mat$Samples, ]
+# genes <- read.delim("/home/chywang/majiao/Supplementary Table1.txt")
+# genes <- genes[ ,2]
+# mat <- mat[ ,na.omit(match(genes, colnames(mat)))]
+out_mat <- out_mat[ ,2]
+out_mat <- as.numeric(factor(out_mat))
+Results <- VSOLassoBag(mat = mat, out.mat = out_mat, a.family="binomial",
+                       plot.freq = T, do.plot = T, lambda.type = "lambda.1se",
+                       bagFreq.sigMethod="CEP", bootN = 1000, parallel = TRUE, n.cores = 40)
+
+
+
+saveRDS(Results, "/home/chywang/majiao/Results.rds")
+
+
+#
+# library(POT, lib.loc = "/home/chywang/miniconda3/envs/VSOLassoBag/lib/R/library")
+#
+#
+# library(SummarizedExperiment)
+# library(VSOLassoBag, lib.loc = "/home/chywang/R/4.0")
+#
+#
+# detach("package:VSOLassoBag")
+# remove.packages("VSOLassoBag")
+# install.packages("/home/chywang/majiao/VSOLassoBag_0.99.0.tar.gz", repos = NULL, type = "source")
+#
+# set.seed(1031)
+# matrix <- readRDS("/home/chywang/majiao/matrix.rds")
+# out_mat <- readRDS("/home/chywang/majiao/out_mat.rds")
+# matrix <- t(matrix)
+# colData <- DataFrame(Group = as.numeric(factor(out_mat)),
+#                      row.names = colnames(matrix))
+# TestData <- SummarizedExperiment(assays = matrix,
+#                                  colData = colData)
+#
+# Results <- VSOLassoBag(ExpressionData = TestData, outcomevariable = "Group",
+#                        bootN = 10, a.family = "binomial",
+#                        bagFreq.sigMethod = "PST", do.plot = TRUE, parallel = T, n.cores = 10)
+#
